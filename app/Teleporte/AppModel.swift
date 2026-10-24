@@ -31,6 +31,10 @@ final class AppModel {
         didSet { UserDefaults.standard.set(reach, forKey: "reach"); send("set", ["reach": reach]) }
     }
 
+    // atalhos globais
+    var shortcuts: [ShortcutAction: KeyCombo] = [:]
+    var shortcutFailures: Set<ShortcutAction> = []  // o sistema recusou (outro app usa a combinação)
+
     @ObservationIgnored private var engine: EngineClient?
     @ObservationIgnored private var capture: CameraCapture?
     @ObservationIgnored private var frames: FrameBuffer?
@@ -45,6 +49,11 @@ final class AppModel {
         micName = d.string(forKey: "micName")
         preferredCameraID = d.string(forKey: "cameraID")
         refreshDevices()
+        for action in ShortcutAction.allCases {
+            let saved = d.data(forKey: "hotkey.\(action.rawValue)").flatMap { try? JSONDecoder().decode(KeyCombo.self, from: $0) }
+            shortcuts[action] = saved ?? action.defaultCombo
+            registerShortcut(action)
+        }
         for name in [AVCaptureDevice.wasConnectedNotification, AVCaptureDevice.wasDisconnectedNotification] {
             NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated { self?.devicesChanged() }
@@ -86,6 +95,56 @@ final class AppModel {
         guard running else { return }
         stop()
         await start()
+    }
+
+    private func registerShortcut(_ action: ShortcutAction) {
+        guard let combo = shortcuts[action], let index = ShortcutAction.allCases.firstIndex(of: action) else { return }
+        let ok = HotKeyCenter.shared.register(id: UInt32(index + 1), combo: combo) { [weak self] in self?.perform(action) }
+        if ok { shortcutFailures.remove(action) } else { shortcutFailures.insert(action) }
+    }
+
+    func perform(_ action: ShortcutAction) {
+        switch action {
+        case .toggle: send("toggle")
+        case .power: Task { await toggleRunning() }
+        case .background: send("capture_bg", ["delay_s": 5])
+        case .reappear: send("reappear")
+        }
+    }
+
+    /// Troca o atalho de uma ação; devolve o motivo se não deu (e mantém o anterior).
+    func setShortcut(_ action: ShortcutAction, _ combo: KeyCombo) -> String? {
+        if let other = ShortcutAction.conflict(for: action, with: combo, in: shortcuts) {
+            return "Já usado em “\(other.title)”."
+        }
+        let previous = shortcuts[action]
+        shortcuts[action] = combo
+        registerShortcut(action)
+        if shortcutFailures.contains(action) {
+            shortcuts[action] = previous
+            registerShortcut(action)
+            return "Outro app já usa \(combo)."
+        }
+        UserDefaults.standard.set(try? JSONEncoder().encode(combo), forKey: "hotkey.\(action.rawValue)")
+        return nil
+    }
+
+    /// Durante a gravação de um atalho: o Carbon consome as combinações registradas antes da janela,
+    /// então sem isso apertar um atalho existente executaria a ação em vez de ser gravado.
+    func suspendShortcuts() {
+        for index in ShortcutAction.allCases.indices { HotKeyCenter.shared.unregister(id: UInt32(index + 1)) }
+    }
+
+    func resumeShortcuts() {
+        ShortcutAction.allCases.forEach(registerShortcut)
+    }
+
+    func resetShortcuts() {
+        for action in ShortcutAction.allCases {
+            UserDefaults.standard.removeObject(forKey: "hotkey.\(action.rawValue)")
+            shortcuts[action] = action.defaultCombo
+            registerShortcut(action)
+        }
     }
 
     func toggleRunning() async {
