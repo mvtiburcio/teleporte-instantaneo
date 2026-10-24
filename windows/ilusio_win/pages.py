@@ -4,10 +4,8 @@ from PySide6.QtGui import QGuiApplication, QPixmap
 from PySide6.QtWidgets import (QComboBox, QFormLayout, QHBoxLayout, QLabel, QProgressBar, QPushButton, QSlider,
                                QVBoxLayout, QWidget)
 
-from . import pix
+from . import __version__, pix
 from .worker import to_qimage
-
-APP_VERSION = "0.1.0"
 
 
 def title(text):
@@ -130,7 +128,7 @@ class SettingsPage(QWidget):
         form = QFormLayout()
         form.setHorizontalSpacing(24)
         form.addRow("Tema", self.theme)
-        form.addRow("Versão", QLabel(APP_VERSION))
+        form.addRow("Versão", QLabel(__version__))
         layout = QVBoxLayout(self)
         layout.setContentsMargins(32, 24, 32, 24)
         layout.addWidget(title("Ajustes"))
