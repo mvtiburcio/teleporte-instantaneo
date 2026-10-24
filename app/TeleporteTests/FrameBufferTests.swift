@@ -73,3 +73,17 @@ enum Repo {
             .first { FileManager.default.isExecutableFile(atPath: $0.path) }
     }
 }
+
+final class PreviewImageTests: XCTestCase {
+    func testBGRAViraCGImageComCorCerta() {
+        let bytes: [UInt8] = [255, 0, 0, 255, 0, 0, 255, 255]  // 2 pixels BGRA: azul, vermelho
+        let img = AppModel.image(bytes, width: 2, height: 1)
+        XCTAssertEqual(img?.width, 2)
+        let ctx = CGContext(data: nil, width: 2, height: 1, bitsPerComponent: 8, bytesPerRow: 8, space: CGColorSpaceCreateDeviceRGB(),
+                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+        ctx.draw(img!, in: CGRect(x: 0, y: 0, width: 2, height: 1))
+        let px = ctx.data!.assumingMemoryBound(to: UInt8.self)
+        XCTAssertEqual([px[0], px[1], px[2]], [0, 0, 255])  // RGBA: azul
+        XCTAssertEqual([px[4], px[5], px[6]], [255, 0, 0])  // vermelho
+    }
+}

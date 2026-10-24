@@ -242,12 +242,24 @@ Coisas não óbvias que apareceram no caminho e já estão tratadas no código:
 - **Sumir = imagem inteira do fundo.** Trocar só a área da pessoa deixava sombra e diferença de exposição; enquanto você está sumido, sai a foto do fundo inteira.
 - **Silêncio no começo do MP3.** O som original tem 0,7 s de silêncio; o `preparar_som.py` corta, e o efeito sai praticamente junto com o gesto.
 
+## App para Mac (em desenvolvimento)
+
+Interface em SwiftUI que substitui o terminal (spec em `docs/superpowers/specs/2026-10-24-app-macos-design.md`). Para rodar a partir do código (macOS 26+, Xcode e `brew install xcodegen`):
+
+```bash
+./setup.sh                      # o app usa o .venv do motor
+cd app && xcodegen generate && open Teleporte.xcodeproj
+```
+
+Opcional: crie `app/Local.xcconfig` com `CODE_SIGN_IDENTITY` e `DEVELOPMENT_TEAM` da sua conta Apple, para o macOS lembrar a permissão de câmera entre builds.
+
 ## Estrutura do repositório
 
 ```
 teleporte-instantaneo/
 ├── teleporte.py           # o programa: gesto, efeito, câmera virtual e mixer de áudio (--ipc = modo app)
 ├── ipc.py                 # ponte com o app: frames em memória compartilhada + comandos JSON
+├── app/                   # app SwiftUI (gera o projeto com xcodegen)
 ├── tests/                 # unittest: .venv/bin/python -m unittest discover -s tests
 ├── teleporte              # lançador (esconde os logs internos do MediaPipe/CoreAudio)
 ├── setup.sh               # instala tudo
