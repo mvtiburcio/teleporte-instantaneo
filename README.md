@@ -334,7 +334,7 @@ O desenho do app está em `docs/superpowers/specs/2026-10-24-app-macos-design.md
 
 ## Créditos e licença
 
-- Código sob a [licença MIT](LICENSE).
+- Código sob a [licença MIT](LICENSE). O **nome Ilusio e o logotipo não estão cobertos pela MIT**: forks devem usar outro nome e logo. Detalhes em [NOTICE.md](NOTICE.md).
 - O **Ilusio Mic** é o driver do [BlackHole](https://github.com/ExistentialAudio/BlackHole) (v0.7.2, © Existential Audio Inc.) compilado com outro nome por `app/IlusioMic/build.sh`. Ele é distribuído sob a **GPL-3.0**, com a licença dentro do driver, e o código-fonte está no link. Para remover: `sudo rm -rf /Library/Audio/Plug-Ins/HAL/IlusioMic.driver && sudo killall coreaudiod`.
 - Feito com [MediaPipe](https://github.com/google-ai-edge/mediapipe), [OpenCV](https://opencv.org), [pyvirtualcam](https://github.com/letmaik/pyvirtualcam), [python-sounddevice](https://github.com/spatialaudio/python-sounddevice), [OBS Studio](https://obsproject.com) e [BlackHole](https://github.com/ExistentialAudio/BlackHole).
-- *Dragon Ball* e o efeito sonoro do Teletransporte Instantâneo pertencem aos seus detentores (Akira Toriyama / Toei Animation). Este é um projeto de fã, sem fins lucrativos e sem afiliação. O áudio **não** está coberto pela licença MIT. Se você é detentor dos direitos e quer a remoção, abra uma issue.
+- *Dragon Ball* e o efeito sonoro do Teletransporte Instantâneo pertencem aos seus detentores (Akira Toriyama / Toei Animation). Este é um projeto de fã, gratuito e sem afiliação; as doações são apoio voluntário. O áudio **não** está coberto pela licença MIT. Se você é detentor dos direitos e quer a remoção, abra uma issue.
