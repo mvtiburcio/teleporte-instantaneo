@@ -70,6 +70,7 @@ fi
 
 echo "==> 5/6 dmg"
 mkdir -p "$OUT/dmg" && ditto "$APP" "$OUT/dmg/Ilusio.app" && ln -s /Applications "$OUT/dmg/Aplicativos"
+cp LICENSE "$OUT/dmg/Licença.txt" && cp NOTICE.md "$OUT/dmg/Avisos.md"  # a licença acompanha o binário
 hdiutil create -quiet -volname "Ilusio $VERSION" -srcfolder "$OUT/dmg" -fs HFS+ -format UDZO "$DMG"
 codesign -s "$IDENTITY" --timestamp "$DMG"
 if [ $NOTARIZE = 1 ]; then
