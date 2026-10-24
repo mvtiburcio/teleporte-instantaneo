@@ -15,8 +15,21 @@ final class AppModel {
     var state: EngineEvent?
     var preview: CGImage?
     var lastError: String?
-    var cameraID: String?
     var bgSaved = false  // confirmação "fundo gravado" por alguns segundos
+    var micLevel = 0.0
+
+    // dispositivos e ajustes, lembrados entre aberturas do app
+    var cameras: [Devices.Item] = []
+    var microphones: [Devices.Item] = []
+    var cameraID: String?  // câmera em uso: a preferida se estiver conectada, senão a do Mac
+    var preferredCameraID: String? { didSet { UserDefaults.standard.set(preferredCameraID, forKey: "cameraID") } }
+    var micName: String? { didSet { UserDefaults.standard.set(micName, forKey: "micName") } }
+    var gain: Double {
+        didSet { UserDefaults.standard.set(gain, forKey: "gain"); send("set", ["gain": gain]) }
+    }
+    var reach: Double {
+        didSet { UserDefaults.standard.set(reach, forKey: "reach"); send("set", ["reach": reach]) }
+    }
 
     @ObservationIgnored private var engine: EngineClient?
     @ObservationIgnored private var capture: CameraCapture?
@@ -24,6 +37,56 @@ final class AppModel {
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var lastOut: UInt64 = 0
     @ObservationIgnored private var outBytes = [UInt8](repeating: 0, count: width * height * 4)
+
+    init() {
+        let d = UserDefaults.standard
+        gain = d.object(forKey: "gain") as? Double ?? 0.8
+        reach = d.object(forKey: "reach") as? Double ?? 1.5
+        micName = d.string(forKey: "micName")
+        preferredCameraID = d.string(forKey: "cameraID")
+        refreshDevices()
+        for name in [AVCaptureDevice.wasConnectedNotification, AVCaptureDevice.wasDisconnectedNotification] {
+            NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated { self?.devicesChanged() }
+            }
+        }
+    }
+
+    private func refreshDevices() {
+        cameras = Devices.cameras()
+        microphones = Devices.microphones()
+        cameraID = Devices.pick(cameras, saved: preferredCameraID)?.id  // nunca sobrescreve a preferência
+    }
+
+    /// Câmera ou microfone conectado/desconectado (iPhone que acorda, webcam USB...).
+    private func devicesChanged() {
+        let using = cameraID
+        refreshDevices()
+        guard running, let cameraID, cameraID != using else { return }
+        if cameraID != preferredCameraID {
+            lastError = "A câmera em uso foi desconectada; usando \(cameras.first { $0.id == cameraID }?.name ?? "outra câmera")."
+        }
+        switchCapture(to: cameraID)  // caiu pra outra, ou a preferida voltou
+    }
+
+    /// Escolha da pessoa: vira a preferência e, com o teleporte ligado, troca ao vivo sem reiniciar o motor.
+    func selectCamera(_ id: String) {
+        preferredCameraID = id
+        cameraID = id
+        if running { switchCapture(to: id) }
+    }
+
+    private func switchCapture(to id: String) {
+        do { try capture?.start(deviceID: id) } catch { lastError = error.localizedDescription }
+    }
+
+    /// Troca o microfone; o motor abre o microfone ao iniciar, então religa se estiver ligado.
+    func selectMic(_ name: String?) async {
+        micName = name
+        guard running else { return }
+        stop()
+        await start()
+    }
 
     func toggleRunning() async {
         if running { stop() } else { await start() }
@@ -35,7 +98,8 @@ final class AppModel {
             lastError = "Sem permissão de câmera: libere em Ajustes > Privacidade e Segurança > Câmera."
             return
         }
-        guard let id = cameraID ?? CameraCapture.cameras().first?.uniqueID else {
+        refreshDevices()
+        guard let id = cameraID else {
             lastError = "Nenhuma câmera encontrada."
             return
         }
@@ -60,7 +124,9 @@ final class AppModel {
                 lastError = "O motor parou (código \(code)). Detalhes em \(Self.logURL.path)."
             }
             try engine.start(executable: exe, arguments: args, log: Self.logURL)
-            engine.send("start", ["shm": shm])
+            var fields: [String: Any] = ["shm": shm, "gain": gain, "reach": reach]
+            if let micName { fields["mic"] = micName }
+            engine.send("start", fields)
             (self.frames, self.capture, self.engine, cameraID) = (frames, capture, engine, id)
             running = true
             lastOut = 0
@@ -79,6 +145,7 @@ final class AppModel {
         capture?.stop()
         (timer, engine, capture, frames) = (nil, nil, nil, nil)
         running = false
+        micLevel = 0
         state = nil
         preview = nil
     }
@@ -92,6 +159,7 @@ final class AppModel {
         case "state":
             if ev.bgReady == true, state?.bgCountdown != nil { flashBgSaved() }  // a contagem acabou de gravar o fundo
             state = ev
+        case "mic_level": micLevel = ev.rms ?? 0
         case "error": lastError = ev.msg ?? ev.code
         default: break
         }

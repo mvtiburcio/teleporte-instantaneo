@@ -10,21 +10,14 @@ enum CaptureError: LocalizedError {
     }
 }
 
-/// Captura a webcam escolhida em BGRA no tamanho do FrameBuffer e escreve cada frame no slot in.
+/// Captura a câmera escolhida (ver Devices) em BGRA no tamanho do FrameBuffer e escreve cada frame no slot in.
 final class CameraCapture: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
-    static let virtualNames = ["OBS Virtual Camera", "Teleporte Camera"]  // nunca capturar a própria saída
     private let session = AVCaptureSession()
     private let queue = DispatchQueue(label: "teleporte.camera")
     private let buffer: FrameBuffer
 
     init(buffer: FrameBuffer) {
         self.buffer = buffer
-    }
-
-    static func cameras() -> [AVCaptureDevice] {
-        AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera, .external, .continuityCamera],
-                                         mediaType: .video, position: .unspecified)
-            .devices.filter { d in !virtualNames.contains { d.localizedName.contains($0) } }
     }
 
     func start(deviceID: String) throws {
@@ -40,6 +33,8 @@ final class CameraCapture: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         output.setSampleBufferDelegate(self, queue: queue)
         session.beginConfiguration()
         defer { session.commitConfiguration() }
+        session.inputs.forEach { session.removeInput($0) }  // trocar de câmera com a sessão rodando
+        session.outputs.forEach { session.removeOutput($0) }
         guard session.canAddInput(input), session.canAddOutput(output) else { throw CaptureError.unsupported }
         session.addInput(input)
         session.addOutput(output)
