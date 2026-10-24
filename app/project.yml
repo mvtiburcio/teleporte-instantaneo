@@ -93,6 +93,9 @@ targets:
       path: IlusioCamera/Info.plist
       properties:
         CFBundleDisplayName: Ilusio Camera
+        # SYSX: é por este tipo que o macOS reconhece uma system extension (o Info.plist gerado não trazia)
+        CFBundlePackageType: $(PRODUCT_BUNDLE_PACKAGE_TYPE)
+        NSSystemExtensionUsageDescription: A câmera do Ilusio entrega o vídeo com o efeito para a chamada.
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)  # a versão que o macOS compara pra trocar a extensão
         CMIOExtension:
