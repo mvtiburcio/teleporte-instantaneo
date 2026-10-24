@@ -297,8 +297,8 @@ final class AppModel {
             if micAsSystem { SystemAudio.takeDefaultInput() }  // WhatsApp: "Usar a configuração do sistema"
             (self.frames, self.capture, self.engine, self.cameraFeed, cameraID) = (frames, capture, engine, feed, id)
             running = true
-            activity = ProcessInfo.processInfo.beginActivity(options: [.userInitiated, .latencyCritical],
-                                                             reason: "Ilusio ligado: entregando vídeo à chamada")
+            activity = activity ?? ProcessInfo.processInfo.beginActivity(options: [.userInitiated, .latencyCritical],
+                                                                         reason: "Ilusio ligado: entregando vídeo à chamada")
             lastOut = 0
             timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 15, repeats: true) { [weak self] _ in
                 MainActor.assumeIsolated { self?.refreshPreview() }
