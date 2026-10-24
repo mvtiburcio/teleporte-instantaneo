@@ -216,8 +216,7 @@ private enum CallApp: String, CaseIterable, Identifiable {
              "Desligue a supressão de ruído."]
         case .whatsapp:
             ["Na chamada de vídeo, clique em ⌄ ao lado da câmera e escolha **Ilusio Camera**.",
-             "No ⌄ do microfone, escolha **Ilusio Mic**.",
-             "Se não houver opção de microfone, escolha Ilusio Mic como entrada em Ajustes do Sistema ▸ Som."]
+             "No ⌄ do microfone, deixe **Usar a configuração do sistema**: o WhatsApp esconde microfones virtuais, e o Ilusio põe o Ilusio Mic como microfone do sistema enquanto estiver ligado."]
         }
     }
 }
