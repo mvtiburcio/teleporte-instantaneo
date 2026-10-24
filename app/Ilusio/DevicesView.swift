@@ -35,6 +35,7 @@ struct DevicesView: View {
                         Text("Ligue o Ilusio para ver").foregroundStyle(.secondary)
                     }
                 }
+                Toggle("Ilusio Mic como microfone do sistema enquanto o Ilusio estiver ligado", isOn: $model.micAsSystem)
                 LabeledContent("Som do efeito") {
                     Button("Testar", systemImage: "speaker.wave.2.fill") { model.send("test_sound") }
                         .disabled(!model.running)
@@ -42,7 +43,7 @@ struct DevicesView: View {
             } header: {
                 Text("Microfone")
             } footer: {
-                Text("O Ilusio mistura este microfone com o som do efeito. Na chamada, escolha o microfone virtual “Ilusio Mic”.")
+                Text("O Ilusio mistura este microfone com o som do efeito. Na chamada, escolha “Ilusio Mic”. Apps que escondem microfones virtuais (como o WhatsApp) funcionam com “Usar a configuração do sistema”: o Ilusio põe o Ilusio Mic como padrão enquanto estiver ligado e devolve o seu microfone ao desligar.")
             }
 
             Section {

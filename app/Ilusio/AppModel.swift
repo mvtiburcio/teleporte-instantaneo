@@ -32,6 +32,8 @@ final class AppModel {
     var cameraID: String?  // câmera em uso: a preferida se estiver conectada, senão a do Mac
     var preferredCameraID: String? { didSet { UserDefaults.standard.set(preferredCameraID, forKey: "cameraID") } }
     var micName: String? { didSet { UserDefaults.standard.set(micName, forKey: "micName") } }
+    /// Com o Ilusio ligado, o Ilusio Mic vira o microfone do sistema (pro WhatsApp, que esconde microfones virtuais).
+    var micAsSystem: Bool { didSet { UserDefaults.standard.set(micAsSystem, forKey: "micAsSystem") } }
     var gain: Double {
         didSet { UserDefaults.standard.set(gain, forKey: "gain"); send("set", ["gain": gain]) }
     }
@@ -66,6 +68,8 @@ final class AppModel {
     init() {
         let d = UserDefaults.standard
         callAppDone = d.bool(forKey: "setup.callApp")
+        micAsSystem = d.object(forKey: "micAsSystem") as? Bool ?? true
+        SystemAudio.restoreDefaultInput()  // o app pode ter fechado à força com o Ilusio Mic como padrão
         gain = d.object(forKey: "gain") as? Double ?? 0.8
         reach = d.object(forKey: "reach") as? Double ?? 1.5
         fps = d.object(forKey: "fps") as? Int ?? 30
@@ -279,8 +283,10 @@ final class AppModel {
             // com a câmera própria instalada, o app entrega o vídeo; senão o motor manda pro OBS
             feed = CameraFeed(frames: frames)
             var fields: [String: Any] = ["shm": shm, "gain": gain, "reach": reach, "vcam": feed == nil, "fps": fps]
-            if let micName { fields["mic"] = micName }
+            // o microfone de verdade é decidido antes de o Ilusio Mic virar o padrão do sistema
+            if let mic = SystemAudio.engineMic(chosen: micName, systemDefault: SystemAudio.defaultInputName) { fields["mic"] = mic }
             engine.send("start", fields)
+            if micAsSystem { SystemAudio.takeDefaultInput() }  // WhatsApp: "Usar a configuração do sistema"
             (self.frames, self.capture, self.engine, self.cameraFeed, cameraID) = (frames, capture, engine, feed, id)
             running = true
             lastOut = 0
@@ -295,6 +301,7 @@ final class AppModel {
     }
 
     func stop() {
+        SystemAudio.restoreDefaultInput()
         timer?.invalidate()
         engine?.stop()
         capture?.stop()
