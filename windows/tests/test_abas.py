@@ -38,8 +38,8 @@ class AbasTest(unittest.TestCase):
         from ilusio_win.app import MainWindow
         app = QApplication.instance() or QApplication([])
         w = MainWindow(cameras=[], mics=["Microfone USB"])
-        nomes = [w.nav.item(i).text().split(maxsplit=1)[1] for i in range(w.nav.count())]
-        self.assertEqual(nomes, ["Início", "Câmera e mic", "Apoiar", "Ajustes"])
+        nomes = [w.nav.item(i).text().split(maxsplit=1)[1].split("  ")[0] for i in range(w.nav.count())]
+        self.assertEqual(nomes, ["Início", "Câmera e mic", "Configuração", "Atalhos", "Apoiar", "Ajustes"])
         w.settings_page.theme.setCurrentIndex(2)  # Escuro
         self.assertEqual(w.settings.value("theme"), "dark")
         self.assertIn("#202024", w.styleSheet())  # fundo do tema escuro
