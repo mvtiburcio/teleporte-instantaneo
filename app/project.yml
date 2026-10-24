@@ -37,6 +37,17 @@ targets:
     dependencies:
       - target: IlusioCamera
         embed: true
+    postCompileScripts:
+      - name: Embutir o Ilusio Mic
+        # driver de áudio próprio (BlackHole GPL-3 renomeado); compilado uma vez por IlusioMic/build.sh
+        script: |
+          set -e
+          driver="$SRCROOT/IlusioMic/build/out/IlusioMic.driver"
+          [ -d "$driver" ] || "$SRCROOT/IlusioMic/build.sh" "${EXPANDED_CODE_SIGN_IDENTITY:--}"  # mesma assinatura do app
+          mkdir -p "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+          rm -rf "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/IlusioMic.driver"
+          ditto "$driver" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/IlusioMic.driver"
+        basedOnDependencyAnalysis: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mvtiburcio.ilusio
@@ -46,6 +57,7 @@ targets:
         PIX_CITY: RECIFE
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_USER_SCRIPT_SANDBOXING: NO  # o script acima copia o driver pra dentro do app
       configs:
         Debug:
           ILUSIO_REPO_DIR: $(SRCROOT)/..

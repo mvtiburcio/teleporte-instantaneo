@@ -42,7 +42,7 @@ struct DevicesView: View {
             } header: {
                 Text("Microfone")
             } footer: {
-                Text("O Ilusio mistura este microfone com o som do efeito. Na chamada, escolha o microfone virtual (BlackHole 2ch).")
+                Text("O Ilusio mistura este microfone com o som do efeito. Na chamada, escolha o microfone virtual “Ilusio Mic”.")
             }
 
             Section("Ajustes finos") {
