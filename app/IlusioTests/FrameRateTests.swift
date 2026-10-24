@@ -18,4 +18,11 @@ final class FrameRateTests: XCTestCase {
         XCTAssertEqual(CameraCapture.pickFormat([F(width: 640, height: 480, maxFPS: 30), F(width: 800, height: 600, maxFPS: 30)], fps: 30), 1)
         XCTAssertNil(CameraCapture.pickFormat([], fps: 30))
     }
+
+    func testFpsDentroDeUmaFaixaDaCamera() {
+        XCTAssertEqual(CameraCapture.clampFPS(15, ranges: [(1, 30)]), 15)
+        XCTAssertEqual(CameraCapture.clampFPS(15, ranges: [(30, 30), (60, 60)]), 30)  // faixas fixas: a mais perto
+        XCTAssertEqual(CameraCapture.clampFPS(60, ranges: [(1, 30)]), 30)
+        XCTAssertEqual(CameraCapture.clampFPS(24, ranges: []), 24)
+    }
 }

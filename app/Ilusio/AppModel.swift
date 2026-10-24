@@ -41,7 +41,8 @@ final class AppModel {
             applyFPS()
         }
     }
-    var deliveredFPS: Double?  // o que a câmera entrega de fato (pode ser menos que o pedido)
+    /// Até quanto a câmera escolhida chega na fps pedida (pode ser menos): calculado dos formatos, ligado ou não.
+    var cameraFPS: Double? { cameraID.flatMap { CameraCapture.maxFPS(deviceID: $0, wanted: Double(fps)) } }
     var reach: Double {
         didSet { UserDefaults.standard.set(reach, forKey: "reach"); send("set", ["reach": reach]) }
     }
@@ -129,7 +130,7 @@ final class AppModel {
     }
 
     private func switchCapture(to id: String) {
-        do { deliveredFPS = try capture?.start(deviceID: id, fps: Double(fps)) } catch { lastError = error.localizedDescription }
+        do { try capture?.start(deviceID: id, fps: Double(fps)) } catch { lastError = error.localizedDescription }
     }
 
     private func applyFPS() {
@@ -244,7 +245,7 @@ final class AppModel {
             let shm = Self.supportDir.appendingPathComponent("frames.shm").path
             let frames = try FrameBuffer(path: shm, width: Self.width, height: Self.height)
             let capture = CameraCapture(buffer: frames)
-            deliveredFPS = try capture.start(deviceID: id, fps: Double(fps))
+            try capture.start(deviceID: id, fps: Double(fps))
             started = capture
             let engine = EngineClient()
             let current = ObjectIdentifier(engine)

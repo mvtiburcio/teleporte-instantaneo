@@ -34,6 +34,26 @@ final class CameraCapture: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
         return formats.indices.max(by: { area($0) < area($1) })
     }
 
+    /// fps aceita pela câmera mais perto da pedida, dentro de uma das faixas do formato (fora delas o
+    /// AVFoundation lança exceção e o app fecha).
+    static func clampFPS(_ fps: Double, ranges: [(min: Double, max: Double)]) -> Double {
+        if ranges.contains(where: { $0.min <= fps && fps <= $0.max }) { return fps }
+        let candidates = ranges.flatMap { [$0.min, $0.max] }
+        return candidates.min(by: { abs($0 - fps) < abs($1 - fps) }) ?? fps
+    }
+
+    /// Maior fps que a câmera entrega em HD, sem ligar nada (pro aviso na aba Câmera e mic).
+    static func maxFPS(deviceID: String, wanted: Double) -> Double? {
+        guard let device = AVCaptureDevice(uniqueID: deviceID) else { return nil }
+        let infos = device.formats.map(info)
+        return pickFormat(infos, fps: wanted).map { min(wanted, infos[$0].maxFPS) }
+    }
+
+    private static func info(_ f: AVCaptureDevice.Format) -> FormatInfo {
+        let d = CMVideoFormatDescriptionGetDimensions(f.formatDescription)
+        return FormatInfo(width: d.width, height: d.height, maxFPS: f.videoSupportedFrameRateRanges.map(\.maxFrameRate).max() ?? 30)
+    }
+
     /// Liga (ou reconfigura) a captura; devolve a fps que a câmera vai entregar de fato.
     @discardableResult
     func start(deviceID: String, fps: Double = 30) throws -> Double {
@@ -60,14 +80,12 @@ final class CameraCapture: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
     }
 
     private func configure(_ device: AVCaptureDevice, fps: Double) -> Double {
-        let infos = device.formats.map { f in
-            let d = CMVideoFormatDescriptionGetDimensions(f.formatDescription)
-            return FormatInfo(width: d.width, height: d.height, maxFPS: f.videoSupportedFrameRateRanges.map(\.maxFrameRate).max() ?? 30)
-        }
+        let infos = device.formats.map(Self.info)
         guard let index = Self.pickFormat(infos, fps: fps), (try? device.lockForConfiguration()) != nil else { return min(fps, 30) }
         defer { device.unlockForConfiguration() }
-        let rate = min(fps, infos[index].maxFPS)
-        device.activeFormat = device.formats[index]
+        let format = device.formats[index]
+        let rate = Self.clampFPS(fps, ranges: format.videoSupportedFrameRateRanges.map { ($0.minFrameRate, $0.maxFrameRate) })
+        device.activeFormat = format
         let duration = CMTime(value: 1, timescale: CMTimeScale(rate.rounded()))
         device.activeVideoMinFrameDuration = duration
         device.activeVideoMaxFrameDuration = duration

@@ -53,7 +53,7 @@ struct DevicesView: View {
             } header: {
                 Text("Vídeo")
             } footer: {
-                if let delivered = model.deliveredFPS, delivered < Double(model.fps) {
+                if let delivered = model.cameraFPS, delivered < Double(model.fps) {
                     Text("Esta câmera vai até \(Int(delivered)) fps; o Ilusio usa esse máximo.")
                 } else {
                     Text("60 fps deixa o movimento mais fluido e usa mais processador. 30 fps é o padrão das chamadas.")
