@@ -2,6 +2,8 @@
 
 Data: 2026-10-24. Status: aprovado no brainstorming.
 
+> **Atualização (2026-10-24):** o app foi renomeado para **Ilusio** (bundle `com.mvtiburcio.ilusio`); o teletransporte virou o primeiro efeito. Os dispositivos próprios passam a se chamar "Ilusio Camera" e "Ilusio Mic". O restante do texto mantém os nomes originais.
+
 ## Objetivo
 
 Transformar o script `teleporte.py` num app de Mac que qualquer pessoa usa sem terminal: escolhe câmera e microfone, testa, configura atalhos, segue um checklist até funcionar e, se quiser, doa via Pix. Distribuído como `.dmg` assinado com Developer ID e notarizado, publicado nas Releases do GitHub (fora da App Store).

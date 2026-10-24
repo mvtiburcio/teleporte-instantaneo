@@ -1,21 +1,143 @@
-# Teletransporte Instantâneo ⚡
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/img/ilusio-logo-escuro.png">
+    <img src="docs/img/ilusio-logo-claro.png" alt="Ilusio" width="360">
+  </picture>
+</p>
 
-<p>
-  <img src="https://img.shields.io/badge/macOS-13%2B-000000?logo=apple&logoColor=white" alt="macOS 13+">
+<p align="center"><b>Efeitos mágicos para a sua câmera nas videochamadas, controlados por gestos.</b></p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/app-macOS%2026%2B-000000?logo=apple&logoColor=white" alt="App: macOS 26+">
   <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
   <img src="https://img.shields.io/badge/MediaPipe-0.10.14-0097A7" alt="MediaPipe 0.10.14">
   <img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green" alt="Licença MIT">
+  <a href="#apoie-o-projeto"><img src="https://img.shields.io/badge/apoie-Pix-32BCAD" alt="Apoie com Pix"></a>
 </p>
 
-Faça o **Teletransporte Instantâneo do Goku** numa videochamada de verdade: coloque **dois dedos na testa**, ouça o *"vuush"* e **suma da câmera** — com os riscos verticais clássicos do anime. Faça o gesto de novo e você **reaparece**, de onde estiver.
+O **Ilusio** coloca efeitos na sua webcam que funcionam no **Google Meet, Zoom, Teams e WhatsApp do Mac**: você faz um gesto e a mágica acontece na chamada, de verdade, para todo mundo ver.
 
-Testado no **Google Meet**. Deve funcionar também no **WhatsApp (app do Mac), Zoom, Teams** e em qualquer app que deixe escolher câmera e microfone.
+O primeiro efeito é o **Teletransporte Instantâneo**, inspirado no Goku: coloque **dois dedos na testa**, ouça o *"vuush"* e **suma da câmera**, com os riscos verticais clássicos do anime. Faça o gesto de novo e você **reaparece**, de onde estiver.
 
 <p align="center">
   <img src="docs/img/efeito.gif" alt="Demonstração: a pessoa é coberta por riscos verticais, pisca e some, ficando só o fundo; depois reaparece" width="640">
 </p>
 
-## Início rápido
+---
+
+## Sumário
+
+- [Duas formas de usar](#duas-formas-de-usar)
+- [App para Mac](#app-para-mac)
+- [Efeito: Teletransporte Instantâneo](#efeito-teletransporte-instantâneo)
+- [Como funciona](#como-funciona)
+- [Modo terminal](#modo-terminal)
+- [Solução de problemas](#solução-de-problemas)
+- [Por dentro: problemas resolvidos](#por-dentro-problemas-resolvidos)
+- [Apoie o projeto](#apoie-o-projeto)
+- [Roadmap](#roadmap)
+- [Contribuir](#contribuir)
+- [Créditos e licença](#créditos-e-licença)
+
+---
+
+## Duas formas de usar
+
+| | **App para Mac** (recomendado) | **Modo terminal** |
+|---|---|---|
+| Para quem | Qualquer pessoa | Quem programa ou tem macOS mais antigo |
+| Sistema | macOS 26+, Apple Silicon | macOS 13+ (Apple Silicon ou Intel) |
+| Configuração | Tour + checklist guiado, tudo na tela | `./setup.sh` + configuração do OBS |
+| Atalhos | Globais (funcionam com a chamada em primeiro plano) | Teclas na janela de prévia |
+| Status | Em desenvolvimento; `.dmg` assinado em breve nas [Releases](https://github.com/mvtiburcio/teleporte-instantaneo/releases) | Pronto |
+
+## App para Mac
+
+Interface em SwiftUI com o visual Liquid Glass do macOS 26.
+
+**Primeiro acesso.** Um tour de 4 passos explica o que é o Ilusio, como funciona e qual é o gesto. Depois, o **checklist da Configuração** deixa tudo pronto em uns 5 minutos. Cada item fica verde sozinho:
+
+1. Permitir a câmera
+2. Permitir o microfone
+3. Câmera virtual
+4. Som virtual
+5. Gravar o fundo
+6. Testar o gesto
+7. Escolher a câmera e o microfone no app de chamada (com instruções para Meet, Zoom, Teams e WhatsApp)
+
+**Abas.**
+
+| Aba | O que tem |
+|---|---|
+| **Início** | Prévia com status (ao vivo, fundo pronto, fps), seletor de câmera, Ligar, Gravar fundo e Some/Volta. A borda brilha em verde quando o gesto é reconhecido. |
+| **Câmera e mic** | Escolha da câmera (a do Mac é o padrão; o iPhone por Continuidade só se você escolher) e do microfone, medidor de nível, teste de som, volume do efeito e sensibilidade do gesto. |
+| **Configuração** | O checklist guiado. |
+| **Atalhos** | Atalhos globais configuráveis. |
+| **Apoiar** | Pix para apoiar o projeto. |
+| **Ajustes** | Tema (Sistema, Claro, Escuro), rever o tour, registro do motor. |
+
+**Atalhos globais** (padrões, configuráveis na aba Atalhos):
+
+| Atalho | Ação |
+|---|---|
+| `⌃⌥T` | Sumir / voltar |
+| `⌃⌥L` | Ligar / desligar o Ilusio |
+| `⌃⌥B` | Gravar o fundo |
+| `⌃⌥R` | Reaparecer na hora (sem efeito) |
+
+**Rodar a partir do código** (enquanto o `.dmg` não sai). Precisa de macOS 26+, Xcode e `brew install xcodegen`:
+
+```bash
+git clone https://github.com/mvtiburcio/teleporte-instantaneo.git
+cd teleporte-instantaneo
+./setup.sh                                   # o app usa o motor em Python do .venv
+cd app && xcodegen generate && open Ilusio.xcodeproj
+```
+
+Opcional: crie `app/Local.xcconfig` (fora do git) com `CODE_SIGN_IDENTITY` e `DEVELOPMENT_TEAM` da sua conta Apple. Assim o macOS lembra a permissão de câmera entre builds.
+
+## Efeito: Teletransporte Instantâneo
+
+### O gesto
+
+<p align="center">
+  <img src="docs/img/gesto.svg" alt="Diagrama do gesto: dois dedos (indicador e médio) juntos tocando a testa; a área aceita é um círculo centrado na testa com raio proporcional à distância entre os olhos" width="720">
+</p>
+
+- A posição da testa é calculada a partir dos **olhos**: o ponto médio entre eles, subindo 0,6× a distância entre os olhos.
+- A tolerância é proporcional a essa distância, então o gesto funciona **perto ou longe** da câmera.
+- Se a mão esconder parte do rosto, o motor usa a última posição vista por até 1 segundo.
+- Segure ~0,25 s. Depois de disparar, **tire a mão** antes do próximo gesto; segurar não fica alternando.
+
+### As etapas do efeito
+
+<p align="center">
+  <img src="docs/img/etapas.jpg" alt="Quatro quadros: 1 normal; 2 riscos verticais brancos e pretos com borrão vertical; 3 a pessoa piscando, quase transparente; 4 só o fundo" width="900">
+</p>
+
+O efeito dura **0,9 s** e acompanha o som:
+
+1. **Normal**: a câmera passa direto.
+2. **Riscos e borrão**: a sua silhueta (MediaPipe Selfie Segmentation) é esticada na vertical e coberta por riscos brancos e pretos, como no anime.
+3. **Piscando**: você fica cada vez mais transparente, piscando entre o fundo e a sua imagem.
+4. **Sumiu**: a chamada recebe só a foto do fundo, até você fazer o gesto de novo.
+
+**Grave o fundo** antes de usar. Saia do quadro **e da frente da luz**: se a sua sombra estiver na parede, ela entra na foto e fica lá quando você sumir.
+
+## Como funciona
+
+<p align="center">
+  <img src="docs/img/arquitetura.svg" alt="Diagrama: webcam e microfone entram no motor; o vídeo sai por uma câmera virtual e o áudio por um microfone virtual, ambos indo para a chamada" width="900">
+</p>
+
+1. **Vídeo.** O motor (`teleporte.py`) procura o gesto com o **MediaPipe** (mão + rosto). Quando ele dispara, o motor recorta a sua silhueta e aplica o efeito. O resultado sai por uma **câmera virtual**, que a chamada enxerga como uma câmera normal.
+2. **Áudio.** As chamadas **cortam** o que sai do alto-falante (cancelamento de eco), então tocar o som no Mac não basta. O motor vira o seu microfone: mistura o microfone de verdade com o som do efeito e manda tudo para um **microfone virtual** (hoje o BlackHole 2ch).
+3. **Sumir.** Enquanto você está "teleportado", a chamada recebe a **foto do fundo** gravada antes, sem sombra nem contorno.
+4. **No app.** O app captura a câmera escolhida e troca os frames com o motor por **memória compartilhada** (`ipc.py`). Os comandos e eventos vão em JSON por linha. A prévia, os atalhos e o checklist ficam no app; o efeito, no motor.
+
+## Modo terminal
+
+### Início rápido
 
 ```bash
 git clone https://github.com/mvtiburcio/teleporte-instantaneo.git
@@ -24,42 +146,9 @@ cd teleporte-instantaneo
 ./teleporte     # roda
 ```
 
-Na chamada: câmera **OBS Virtual Camera**, microfone **BlackHole 2ch**. Na janela *teleporte*: **B** grava o fundo, **dois dedos na testa** some e volta.
-Primeira vez? Siga também a [configuração única do OBS](#configuração-única-do-obs).
+Na chamada, escolha a câmera **OBS Virtual Camera** e o microfone **BlackHole 2ch**. Na janela *teleporte*, **B** grava o fundo e **dois dedos na testa** fazem você sumir e voltar.
 
----
-
-## Sumário
-
-- [Início rápido](#início-rápido)
-- [Como funciona](#como-funciona)
-- [Requisitos](#requisitos)
-- [Instalação](#instalação)
-- [Configuração única do OBS](#configuração-única-do-obs)
-- [Usando numa chamada](#usando-numa-chamada)
-- [O gesto](#o-gesto)
-- [As etapas do efeito](#as-etapas-do-efeito)
-- [Atalhos](#atalhos)
-- [Ajustes finos](#ajustes-finos)
-- [Trocar o som](#trocar-o-som)
-- [Solução de problemas](#solução-de-problemas)
-- [Por dentro: problemas resolvidos](#por-dentro-problemas-resolvidos)
-- [Estrutura do repositório](#estrutura-do-repositório)
-- [Créditos e licença](#créditos-e-licença)
-
----
-
-## Como funciona
-
-<p align="center">
-  <img src="docs/img/arquitetura.svg" alt="Diagrama: webcam e microfone entram no teleporte.py; o vídeo sai pela OBS Virtual Camera e o áudio pelo BlackHole 2ch, ambos indo para o Meet/WhatsApp" width="900">
-</p>
-
-1. **Vídeo** — o `teleporte.py` lê a sua webcam, procura o gesto com o **MediaPipe** (mão + rosto) e, quando dispara, recorta a sua silhueta e aplica o efeito. O resultado sai pela **OBS Virtual Camera**, que o Meet/WhatsApp enxerga como uma câmera normal.
-2. **Áudio** — o Meet e o WhatsApp **cortam** o que sai do alto-falante (cancelamento de eco), então tocar o som no Mac não basta. O script vira o seu microfone: mistura o microfone de verdade com o som do teletransporte e manda tudo para o **BlackHole 2ch**, uma placa de som virtual que a chamada usa como microfone.
-3. **Sumir** — enquanto você está "teleportado", a chamada recebe a **foto do fundo** que você gravou antes, então não sobra sombra nem contorno.
-
-## Requisitos
+### Requisitos
 
 | Item | Por quê |
 |---|---|
@@ -67,64 +156,39 @@ Primeira vez? Siga também a [configuração única do OBS](#configuração-úni
 | [**Homebrew**](https://brew.sh) | Instala o resto automaticamente |
 | **Python 3.12** | O MediaPipe ainda não tem pacote para 3.13/3.14 (o `setup.sh` instala) |
 | **OBS Studio** 30+ | Fornece a câmera virtual (o `setup.sh` instala) |
-| **BlackHole 2ch** | Leva o som do teletransporte para a chamada (o `setup.sh` instala) |
+| **BlackHole 2ch** | Leva o som do efeito para a chamada (o `setup.sh` instala) |
 | Webcam + microfone | Os do próprio Mac servem |
 
-## Instalação
-
-```bash
-git clone https://github.com/mvtiburcio/teleporte-instantaneo.git
-cd teleporte-instantaneo
-./setup.sh
-```
+### Instalação
 
 O `setup.sh` faz, nesta ordem:
 
-1. Instala o **Python 3.12**, o **OBS** e o **BlackHole 2ch** via Homebrew (o BlackHole pede a sua senha de administrador).
-2. Reinicia o serviço de áudio do Mac (`sudo killall coreaudiod`) para o BlackHole aparecer na lista de dispositivos — o som corta por ~2 segundos.
+1. Instala o **Python 3.12**, o **OBS** e o **BlackHole 2ch** via Homebrew. O BlackHole pede a sua senha de administrador.
+2. Reinicia o serviço de áudio do Mac (`sudo killall coreaudiod`), para o BlackHole aparecer na lista de dispositivos. O som corta por ~2 segundos.
 3. Cria o ambiente Python em `.venv/` e instala as dependências do `requirements.txt`.
-4. Prepara o som: converte `sons/goku-teleport.mp3` em `sons/teleport.wav` cortando o silêncio do começo.
+4. Prepara o som: converte `sons/goku-teleport.mp3` em `sons/teleport.wav`, cortando o silêncio do começo.
 
-> **Atalho opcional:** para rodar de qualquer pasta digitando só `teleporte`, adicione um alias ao seu shell:
+> **Atalho opcional:** para rodar de qualquer pasta digitando só `teleporte`:
 > ```bash
 > echo "alias teleporte=\"$PWD/teleporte\"" >> ~/.zshrc && source ~/.zshrc
 > ```
 
-## Configuração única do OBS
+### Configuração única do OBS
 
 Só precisa ser feita **uma vez**, para o macOS liberar a câmera virtual:
 
-1. Abra o **OBS**. Se perguntar sobre fontes de vídeo vazias, clique em **Sim** — o script é quem manda a imagem, o OBS não precisa de cena.
+1. Abra o **OBS**. Se ele perguntar sobre fontes de vídeo vazias, clique em **Sim**: quem manda a imagem é o motor, o OBS não precisa de cena.
 2. Clique em **Iniciar câmera virtual**.
-3. O macOS avisa que a extensão foi bloqueada. Vá em **Ajustes do Sistema → Geral → Itens de Início e Extensões → Extensões de Câmera** (ⓘ) e ative o **OBS Studio**. Digite sua senha.
-4. Volte ao OBS: o botão vira **Interromper câmera virtual** — funcionou. Clique nele e **feche o OBS (⌘Q)**.
+3. O macOS avisa que a extensão foi bloqueada. Vá em **Ajustes do Sistema → Geral → Itens de Início e Extensões → Extensões de Câmera** (ⓘ), ative o **OBS Studio** e digite sua senha.
+4. Volte ao OBS: o botão vira **Interromper câmera virtual**, sinal de que funcionou. Clique nele e **feche o OBS (⌘Q)**.
 
-> O OBS precisa estar **fechado** quando você usa o teletransporte: só um programa pode alimentar a câmera virtual por vez.
+> O OBS precisa estar **fechado** enquanto o efeito roda: só um programa pode alimentar a câmera virtual por vez.
 
-Na primeira execução do `./teleporte`, o macOS também pede permissão de **Câmera** e **Microfone** para o Terminal. Permita. Se a permissão não aparecer, ative em **Ajustes do Sistema → Privacidade e Segurança → Câmera / Microfone → Terminal**.
+Na primeira execução, o macOS pede permissão de **Câmera** e **Microfone** para o Terminal. Se o pedido não aparecer, ative em **Ajustes do Sistema → Privacidade e Segurança → Câmera / Microfone → Terminal**.
 
-## Usando numa chamada
+### Configurar a chamada
 
-### 1. Rodar
-
-```bash
-./teleporte
-```
-
-Deixe o Terminal aberto durante a chamada. Você deve ver:
-
-```
-Microfone 'AirPods Pro' + teleporte -> BlackHole. Na chamada, escolha o microfone 'BlackHole 2ch'.
-Na chamada, escolha a câmera 'OBS Virtual Camera'.
-Com a janela "teleporte" em foco, aperte B e, em 5 s, saia do quadro e da frente da luz (grava o fundo).
-Dois dedos na testa = some / volta. R = voltar na hora, Q = sair.
-```
-
-Uma janela chamada **teleporte** abre com a prévia (espelhada, como um espelho).
-
-### 2. Configurar a chamada
-
-**Google Meet** — `⋮ → Configurações`:
+**Google Meet** (`⋮ → Configurações`):
 
 | Aba | Opção | Valor |
 |---|---|---|
@@ -134,56 +198,11 @@ Uma janela chamada **teleporte** abre com a prévia (espelhada, como um espelho)
 | Áudio | Cancelamento de ruído | **Desligado** (senão o Meet pode cortar o som) |
 | `⋮ → Aplicar efeitos visuais` | — | **Sem efeito** (o desfoque do Meet borra a imagem quando você some) |
 
-**WhatsApp (app do Mac)** — na chamada de vídeo, no menu de câmera/microfone (`⋯` ou setinha ao lado do botão da câmera): câmera **OBS Virtual Camera**, microfone **BlackHole 2ch**.
-Se o app não deixar escolher o microfone: **Ajustes do Sistema → Som → Entrada → BlackHole 2ch** *antes* de rodar o `./teleporte` — o script detecta isso e usa o primeiro microfone de verdade da lista. Depois da chamada, volte a entrada para o microfone normal.
+**WhatsApp (app do Mac)**: na chamada de vídeo, no menu de câmera e microfone, escolha **OBS Virtual Camera** e **BlackHole 2ch**. Se o app não deixar escolher o microfone, mude **Ajustes do Sistema → Som → Entrada** para **BlackHole 2ch** *antes* de rodar; o motor detecta isso e usa o primeiro microfone de verdade da lista. O WhatsApp do celular não funciona, porque a câmera é a do telefone.
 
-> No **WhatsApp do celular não funciona**: a câmera é a do telefone, o script não tem acesso a ela.
+**Zoom / Teams / outros**: mesmo esquema, com efeitos de fundo e supressão de ruído desligados.
 
-**Zoom / Teams / outros** — mesmo esquema: câmera **OBS Virtual Camera**, microfone **BlackHole 2ch**, efeitos de fundo e supressão de ruído desligados.
-
-### 3. Gravar o fundo
-
-1. Clique na janela **teleporte** e aperte **B**.
-2. Começa uma contagem de **5 segundos**. Saia do quadro **e da frente da luz** — se a sua sombra estiver na parede, ela entra na foto e fica lá quando você sumir.
-3. Grave de novo (**B**) sempre que a luz do ambiente mudar.
-
-### 4. Teleportar
-
-- **Dois dedos na testa** por um instante (~0,25 s) → som + riscos → você some.
-- **Dois dedos na testa de novo** → você reaparece com o mesmo efeito ao contrário. Pode ser de outro lugar do quarto, em pé, longe da câmera.
-
-### 5. Depois da chamada
-
-Aperte **Q** e volte o microfone da chamada para o normal — com o script fechado, o BlackHole fica mudo.
-
-## O gesto
-
-<p align="center">
-  <img src="docs/img/gesto.svg" alt="Diagrama do gesto: dois dedos (indicador e médio) juntos tocando a testa; a área aceita é um círculo centrado na testa com raio proporcional à distância entre os olhos" width="720">
-</p>
-
-- A posição da testa é calculada a partir dos **olhos**: meio dos olhos, subindo 0,6× a distância entre eles.
-- A tolerância também é proporcional a essa distância, então o gesto funciona **perto ou longe** da câmera.
-- Se a mão esconder parte do rosto, o script usa a última posição do rosto vista por até 1 segundo.
-- A **bolinha verde** no canto da janela *teleporte* mostra que o gesto foi reconhecido (ela não aparece na chamada).
-- Depois de disparar, é preciso **tirar a mão** antes de disparar de novo — segurar o gesto não fica alternando.
-
-## As etapas do efeito
-
-<p align="center">
-  <img src="docs/img/etapas.jpg" alt="Quatro quadros: 1 normal; 2 riscos verticais brancos e pretos com borrão vertical; 3 a pessoa piscando, quase transparente; 4 só o fundo" width="900">
-</p>
-
-O efeito dura **0,9 s** e acompanha o som:
-
-1. **Normal** — a câmera passa direto.
-2. **Riscos + borrão** — a sua silhueta (MediaPipe Selfie Segmentation) é esticada na vertical e coberta por riscos brancos e pretos, como no anime.
-3. **Piscando** — você fica cada vez mais transparente, piscando entre o fundo e a sua imagem.
-4. **Sumiu** — a chamada recebe só a foto do fundo, até você fazer o gesto de novo.
-
-## Atalhos
-
-Com a janela **teleporte** em foco:
+### Teclas (janela *teleporte* em foco)
 
 | Tecla | Ação |
 |---|---|
@@ -191,9 +210,11 @@ Com a janela **teleporte** em foco:
 | `R` | Reaparece na hora, sem efeito |
 | `Q` | Fecha |
 
-## Ajustes finos
+Depois da chamada, aperte **Q** e volte o microfone da chamada para o normal: com o motor fechado, o BlackHole fica mudo.
 
-Todos no começo do `teleporte.py`:
+### Ajustes finos
+
+Todos no começo do `teleporte.py` (no app, volume e sensibilidade ficam na aba Câmera e mic):
 
 | Constante | Padrão | O que faz |
 |---|---|---|
@@ -205,81 +226,96 @@ Todos no começo do `teleporte.py`:
 | `BG_DELAY_S` | `5` | Contagem entre apertar **B** e gravar o fundo. |
 | `SFX_GAIN` | `0.8` | Volume do som na chamada, em relação ao microfone. |
 
-## Trocar o som
+### Trocar o som
 
-Qualquer áudio que o macOS abre (mp3, m4a, wav, aiff…):
+Serve qualquer áudio que o macOS abre (mp3, m4a, wav, aiff…):
 
 ```bash
 .venv/bin/python tools/preparar_som.py ~/Downloads/meu-som.mp3
 ```
 
-O script converte para `sons/teleport.wav`, **corta o silêncio do começo** (deixando 0,1 s, que casa com `SOUND_LEAD`) e o fim. Ajuste `FX_S` para a duração da parte mais forte do som.
+O script converte para `sons/teleport.wav` e **corta o silêncio do começo**, deixando 0,1 s, que casa com `SOUND_LEAD`. Também corta o do fim. Ajuste `FX_S` para a duração da parte mais forte do som.
 
 ## Solução de problemas
 
 | Sintoma | Causa | Solução |
 |---|---|---|
-| A chamada mostra o **logo do OBS** com uma câmera riscada | Nada está alimentando a câmera virtual | Rode `./teleporte`. Se já estiver rodando, troque de câmera na chamada e volte. |
-| `Câmera virtual indisponível` | O OBS está aberto usando a câmera virtual | Feche o OBS (⌘Q) e rode de novo. |
-| `Webcam não encontrada` / `not authorized to capture video` | Sem permissão de câmera | Ajustes do Sistema → Privacidade e Segurança → Câmera → ative o Terminal. Feche e abra o Terminal. |
-| `A câmera virtual não está instalada` (no OBS) | Extensão não aprovada | Veja [Configuração única do OBS](#configuração-única-do-obs). |
-| Fica uma **sombra** quando você some | A sua sombra estava na parede quando o fundo foi gravado | Aperte **B** e saia também da frente da luz. |
+| A chamada mostra o **logo do OBS** com uma câmera riscada | Nada está alimentando a câmera virtual | Ligue o Ilusio (ou rode `./teleporte`). Se já estiver ligado, troque de câmera na chamada e volte. |
+| `Câmera virtual indisponível` | O OBS está aberto usando a câmera virtual | Feche o OBS (⌘Q) e tente de novo. |
+| `Webcam não encontrada` / `not authorized to capture video` | Sem permissão de câmera | Ajustes do Sistema → Privacidade e Segurança → Câmera → ative o Ilusio (ou o Terminal). |
+| Fica uma **sombra** quando você some | A sua sombra estava na parede quando o fundo foi gravado | Grave o fundo de novo, saindo também da frente da luz. |
 | Sobra um **contorno** em volta de você no efeito | Máscara apertada | Suba `GROW_PX` (41, 51…). |
-| O gesto **não é reconhecido** | Tolerância baixa, mão longe ou rosto escondido | Suba `REACH`; deixe os olhos visíveis; confira a bolinha verde. |
+| O gesto **não é reconhecido** | Tolerância baixa, mão longe ou rosto escondido | Aumente a sensibilidade (ou `REACH`) e deixe os olhos visíveis. |
 | Imagem **borrada** na chamada | Desfoque de fundo da própria chamada | Desligue os efeitos visuais do Meet/Zoom/Teams. |
 | A chamada **não ouve** o som | Microfone errado ou supressão de ruído | Microfone **BlackHole 2ch**; desligue o cancelamento de ruído. |
 | `BlackHole não instalado` mesmo após instalar | O CoreAudio não recarregou | `sudo killall coreaudiod` ou reinicie o Mac. |
-| `PaMacCore ... err='-50'` no Terminal | Aviso do driver ao abrir o BlackHole | Pode ignorar — o áudio passa certo (o `./teleporte` já esconde). |
+| `PaMacCore ... err='-50'` no Terminal | Aviso do driver ao abrir o BlackHole | Pode ignorar: o áudio passa certo (o `./teleporte` já esconde esse aviso). |
+| O app mostra "O motor parou" | Erro no motor | Ajustes → Registro do motor → **Mostrar no Finder** e abra o `engine.log`. |
 
 ## Por dentro: problemas resolvidos
 
 Coisas não óbvias que apareceram no caminho e já estão tratadas no código:
 
-- **A câmera virtual "rouba" o índice 0.** Quando a OBS Virtual Camera está ativa, ela entra na lista de câmeras do OpenCV e a webcam muda de índice. O `open_webcam()` manda uma imagem magenta para a câmera virtual e fica com a primeira câmera que devolve **outra** coisa.
-- **Microfone + BlackHole num fluxo só devolve lixo (`NaN`).** São dois dispositivos com relógios diferentes. A solução foram dois fluxos (`InputStream` do microfone e `OutputStream` do BlackHole) ligados por uma fila curta, que descarta blocos antigos para o atraso não crescer.
+- **A câmera virtual "rouba" o índice 0.** No modo terminal, a OBS Virtual Camera entra na lista do OpenCV e a webcam muda de índice. O `open_webcam()` manda magenta para a câmera virtual e fica com a primeira câmera que devolve **outra** coisa. O app escapa disso capturando a câmera pelo identificador do AVFoundation.
+- **Microfone e BlackHole num fluxo só devolvem lixo (`NaN`).** São dois dispositivos com relógios diferentes. A solução foram dois fluxos ligados por uma fila curta, que descarta blocos antigos para o atraso não crescer.
 - **BlackHole a 48 kHz.** Com outra taxa, o CoreAudio reclama; o som é reamostrado para 48 kHz ao carregar.
-- **Desempenho.** Mão + rosto custam ~25 ms por frame no M2; a detecção roda a cada 2 frames para manter 30 fps. A segmentação da silhueta só roda durante o efeito.
-- **Sumir = imagem inteira do fundo.** Trocar só a área da pessoa deixava sombra e diferença de exposição; enquanto você está sumido, sai a foto do fundo inteira.
-- **Silêncio no começo do MP3.** O som original tem 0,7 s de silêncio; o `preparar_som.py` corta, e o efeito sai praticamente junto com o gesto.
+- **Desempenho.** Mão e rosto custam ~25 ms por frame no M2, então a detecção roda a cada 2 frames para manter 30 fps. A segmentação da silhueta só roda durante o efeito.
+- **Sumir = imagem inteira do fundo.** Trocar só a área da pessoa deixava sombra e diferença de exposição.
+- **Frames entre o app e o motor sem rasgo.** A memória compartilhada usa *seqlock*: o contador fica ímpar enquanto alguém escreve, e quem lê descarta o frame se o contador mudou no meio.
+- **Python do Homebrew fora do venv.** Com `..` no caminho, `standardizedFileURL` resolve symlinks e transforma o `.venv/bin/python` no Python do sistema, sem numpy. O app padroniza só a pasta.
 
-## App para Mac (em desenvolvimento)
+## Apoie o projeto
 
-Interface em SwiftUI que substitui o terminal (spec em `docs/superpowers/specs/2026-10-24-app-macos-design.md`). Para rodar a partir do código (macOS 26+, Xcode e `brew install xcodegen`):
+O Ilusio é **grátis e de código aberto**. Se ele te fez rir numa reunião, um Pix de **qualquer valor** ajuda a manter o projeto e a criar novos efeitos.
 
-```bash
-./setup.sh                      # o app usa o .venv do motor
-cd app && xcodegen generate && open Teleporte.xcodeproj
+<p align="center">
+  <img src="docs/img/pix-qr.png" alt="QR code Pix para apoiar o Ilusio" width="220">
+</p>
+
+Abra o app do seu banco, escolha **Pix → Ler QR code** ou **Pix copia e cola** e digite o valor que quiser:
+
+```
+00020126580014br.gov.bcb.pix0136d1fef5be-4e51-4a50-86fb-8810cb8bfcd45204000053039865802BR5906ILUSIO6006RECIFE62070503***63048C40
 ```
 
-Opcional: crie `app/Local.xcconfig` com `CODE_SIGN_IDENTITY` e `DEVELOPMENT_TEAM` da sua conta Apple, para o macOS lembrar a permissão de câmera entre builds.
+O mesmo Pix está na aba **Apoiar** do app. Também ajuda muito dar uma ⭐ no repositório, abrir issues com ideias de efeitos e mandar PRs.
 
-## Estrutura do repositório
+## Roadmap
+
+- [x] Efeito Teletransporte Instantâneo
+- [x] App para Mac: Início, Câmera e mic, Configuração guiada, Atalhos globais, Apoiar, Ajustes e tour de primeiro acesso
+- [ ] Câmera virtual própria (**Ilusio Camera**), sem precisar do OBS
+- [ ] Microfone virtual próprio (**Ilusio Mic**), sem precisar do BlackHole
+- [ ] `.dmg` assinado e notarizado nas Releases
+- [ ] Novos efeitos com gestos. Tem uma ideia? [Abra uma issue](https://github.com/mvtiburcio/teleporte-instantaneo/issues).
+
+## Contribuir
 
 ```
 teleporte-instantaneo/
-├── teleporte.py           # o programa: gesto, efeito, câmera virtual e mixer de áudio (--ipc = modo app)
+├── teleporte.py           # motor: gesto, efeito, câmera virtual e mixer de áudio (--ipc = modo app)
 ├── ipc.py                 # ponte com o app: frames em memória compartilhada + comandos JSON
-├── app/                   # app SwiftUI (gera o projeto com xcodegen)
-├── tests/                 # unittest: .venv/bin/python -m unittest discover -s tests
-├── teleporte              # lançador (esconde os logs internos do MediaPipe/CoreAudio)
+├── app/                   # app Ilusio em SwiftUI (gere o projeto com xcodegen)
+├── tests/                 # testes do motor
+├── teleporte              # lançador do modo terminal (esconde os logs internos do MediaPipe/CoreAudio)
 ├── setup.sh               # instala tudo
 ├── requirements.txt       # dependências Python fixadas
-├── sons/
-│   └── goku-teleport.mp3  # som original (o teleport.wav é gerado a partir dele)
-├── tools/
-│   ├── preparar_som.py    # converte qualquer áudio e corta o silêncio
-│   └── gerar_demo.py      # gera o GIF e as imagens deste README (com o rosto pixelado)
-└── docs/img/              # imagens do README
+├── sons/goku-teleport.mp3 # som original (o teleport.wav é gerado a partir dele)
+├── tools/                 # preparar_som.py e gerar_demo.py (rosto pixelado nas imagens)
+└── docs/                  # imagens do README, spec e planos de cada PR
 ```
 
-Para regenerar as imagens do README com a sua webcam (o rosto é pixelado antes de salvar):
+Testes:
 
 ```bash
-.venv/bin/python tools/gerar_demo.py
+.venv/bin/python -m unittest discover -s tests          # motor
+cd app && xcodebuild test -project Ilusio.xcodeproj -scheme Ilusio -destination 'platform=macOS,arch=arm64'
 ```
+
+O desenho do app está em `docs/superpowers/specs/2026-10-24-app-macos-design.md`. Cada PR tem o seu plano em `docs/superpowers/plans/`.
 
 ## Créditos e licença
 
 - Código sob a [licença MIT](LICENSE).
 - Feito com [MediaPipe](https://github.com/google-ai-edge/mediapipe), [OpenCV](https://opencv.org), [pyvirtualcam](https://github.com/letmaik/pyvirtualcam), [python-sounddevice](https://github.com/spatialaudio/python-sounddevice), [OBS Studio](https://obsproject.com) e [BlackHole](https://github.com/ExistentialAudio/BlackHole).
-- *Dragon Ball* e o efeito sonoro do Teletransporte Instantâneo pertencem aos seus detentores (Akira Toriyama / Toei Animation). Este é um projeto de fã, sem fins lucrativos e sem afiliação. O áudio **não** está coberto pela licença MIT — se você é detentor dos direitos e quer a remoção, abra uma issue.
+- *Dragon Ball* e o efeito sonoro do Teletransporte Instantâneo pertencem aos seus detentores (Akira Toriyama / Toei Animation). Este é um projeto de fã, sem fins lucrativos e sem afiliação. O áudio **não** está coberto pela licença MIT. Se você é detentor dos direitos e quer a remoção, abra uma issue.
