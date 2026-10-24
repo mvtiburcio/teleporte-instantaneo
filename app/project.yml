@@ -25,9 +25,16 @@ targets:
         NSCameraUsageDescription: O Teleporte usa a câmera para reconhecer o gesto e aplicar o efeito.
         NSMicrophoneUsageDescription: O Teleporte mistura o seu microfone com o som do teletransporte para a chamada ouvir.
         TeleporteRepoDir: $(TELEPORTE_REPO_DIR)
+        PixKey: $(PIX_KEY)
+        PixName: $(PIX_NAME)
+        PixCity: $(PIX_CITY)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mvtiburcio.teleporte
+        # doação (aba Apoiar): chave Pix aleatória, pública por natureza
+        PIX_KEY: d1fef5be-4e51-4a50-86fb-8810cb8bfcd4
+        PIX_NAME: TELEPORTE INSTANTANEO
+        PIX_CITY: RECIFE
         GENERATE_INFOPLIST_FILE: NO
       configs:
         Debug:
