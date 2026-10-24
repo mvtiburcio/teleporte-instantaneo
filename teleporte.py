@@ -1,10 +1,11 @@
 # teleporte.py — teletransporte instantâneo: dois dedos na testa e você some (e volta)
-import os, time, wave, queue, subprocess, warnings
+import os, sys, time, wave, queue, threading, subprocess, warnings
 warnings.filterwarnings("ignore", category=UserWarning)  # aviso de depreciação do protobuf
 import cv2, numpy as np
 import mediapipe as mp
 import pyvirtualcam
 import sounddevice as sd
+from ipc import FrameShm, parse_command, emit
 
 SOUND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sons", "teleport.wav")  # gerado por tools/preparar_som.py
 SOUND_LEAD = 0.1  # do disparo até o "vuush" do som: o efeito começa nesse ponto
@@ -204,6 +205,96 @@ class Teleporter:
             self.bg, self.hidden, self.fx_start, self.bg_at = frame.copy(), False, None, None
         return out
 
+def run_ipc():
+    # modo app: frames entram e saem por memória compartilhada; comandos no stdin, eventos no stdout
+    global sfx, sfx_gain
+    proto, sys.stdout = sys.stdout, sys.stderr  # print() solto não pode sujar o protocolo
+    say = lambda event, **f: emit(event, out=proto, **f)
+    cmds = queue.Queue()
+
+    def read_stdin():
+        for line in sys.stdin:
+            if line.strip():
+                try:
+                    cmds.put(parse_command(line))
+                except ValueError as e:
+                    say("error", code="bad_command", msg=str(e))
+        cmds.put({"cmd": "stop"})  # o app fechou o pipe (ou morreu): encerra junto
+
+    threading.Thread(target=read_stdin, daemon=True).start()
+    say("ready", version=1)
+    start = cmds.get()
+    while start["cmd"] != "start":
+        if start["cmd"] == "stop":
+            return 0
+        start = cmds.get()
+    if not os.path.exists(SOUND):
+        say("error", code="no_sound", msg="sons/teleport.wav não encontrado")
+        return 1
+    sfx, sfx_gain = load_sfx(), float(start.get("gain", SFX_GAIN))
+    try:
+        shm = FrameShm(start["shm"], W, H)
+    except (KeyError, OSError, ValueError) as e:
+        say("error", code="bad_shm", msg=str(e))
+        return 1
+    bridge = None  # guarda a referência: os fluxos de áudio vivem enquanto ela existir
+    if start.get("output", "") is not None:
+        bridge = open_mic_bridge(start.get("mic"), (start["output"],) if start.get("output") else VIRTUAL_OUTS)
+        if bridge is None:
+            say("error", code="audio_unavailable", msg="sem saída virtual ou sem microfone")
+    vcam = None
+    if start.get("vcam", True):
+        try:
+            vcam = pyvirtualcam.Camera(W, H, fps=30, fmt=pyvirtualcam.PixelFormat.BGR)
+        except RuntimeError as e:
+            say("error", code="no_virtual_camera", msg=str(e))
+    tp = Teleporter(fire_sound)
+    tp.reach = float(start.get("reach", REACH))
+    next_state = next_level = t0 = time.time()
+    frames, seen_sent = 0, False
+    try:
+        while True:
+            now = time.time()
+            try:
+                c = cmds.get_nowait()
+            except queue.Empty:
+                c = None
+            if c:
+                name = c["cmd"]
+                if name == "stop":
+                    break
+                elif name == "capture_bg": tp.capture_bg(now, float(c.get("delay_s", BG_DELAY_S)))
+                elif name == "toggle": tp.fire(now)
+                elif name == "reappear": tp.reappear()
+                elif name == "set":
+                    sfx_gain = float(c.get("gain", sfx_gain))
+                    tp.reach = float(c.get("reach", tp.reach))
+                elif name == "test_sound": fire_sound()
+            if now >= next_state:
+                say("state", hidden=tp.hidden, bg_ready=tp.bg is not None, bg_countdown=tp.bg_countdown(now),
+                    gesture=tp.sign, fps=round(frames / max(now - t0, 1e-6), 1))
+                next_state, t0, frames = now + 0.2, now, 0
+            if bridge and now >= next_level:
+                say("mic_level", rms=round(mic_rms, 4))
+                next_level = now + 0.1
+            bgra = shm.read("in")
+            if bgra is None:
+                time.sleep(0.001)
+                continue
+            out = tp.step(cv2.cvtColor(bgra, cv2.COLOR_BGRA2BGR), now)
+            shm.write("out", cv2.cvtColor(out, cv2.COLOR_BGR2BGRA))
+            if vcam:
+                vcam.send(out)
+            frames += 1
+            if tp.gesture_seen and not seen_sent:
+                say("gesture_seen")
+                seen_sent = True
+    finally:
+        if vcam:
+            vcam.close()
+        shm.close()
+    return 0
+
 def main():
     global sfx
     if not os.path.exists(SOUND):
@@ -247,4 +338,4 @@ def main():
             elif k == ord('q'): break
 
 if __name__ == "__main__":
-    main()
+    sys.exit(run_ipc() if "--ipc" in sys.argv[1:] else main())

@@ -58,11 +58,13 @@ Um arquivo `frames.shm` em `~/Library/Application Support/Teleporte/`, mapeado c
 
 ### Protocolo stdin/stdout (JSON por linha)
 
+Comandos são `{"cmd": "<nome>", ...}` e eventos `{"event": "<nome>", ...}`.
+
 App → motor:
 
 | Comando | Campos |
 |---|---|
-| `start` | `shm`, `mic` (nome do dispositivo), `output` (nome da saída virtual), `gain`, `reach` |
+| `start` | `shm`, `mic` (nome do dispositivo), `output` (nome da saída virtual; `null` = sem áudio), `gain`, `reach`, `vcam` (bool; envia também pra OBS Virtual Camera até o PR 3) |
 | `capture_bg` | `delay_s` |
 | `toggle` | dispara o teleporte, igual ao gesto |
 | `reappear` | volta na hora, sem efeito |
