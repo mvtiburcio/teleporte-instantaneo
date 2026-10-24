@@ -1,6 +1,12 @@
 # teleporte.py — teletransporte instantâneo: dois dedos na testa e você some (e volta)
 import os, sys, time, wave, queue, threading, subprocess, warnings
 warnings.filterwarnings("ignore", category=UserWarning)  # aviso de depreciação do protobuf
+import types
+# o MediaPipe importa o matplotlib só pra desenhar gráficos (nunca usado aqui); congelado, ele ainda reconstruía
+# o cache de fontes a cada abertura (~10 s). Um módulo vazio no lugar corta isso
+for _name in ("matplotlib", "matplotlib.pyplot"):
+    sys.modules.setdefault(_name, types.ModuleType(_name))
+sys.modules["matplotlib"].pyplot = sys.modules["matplotlib.pyplot"]
 import cv2, numpy as np
 import mediapipe as mp
 import pyvirtualcam
