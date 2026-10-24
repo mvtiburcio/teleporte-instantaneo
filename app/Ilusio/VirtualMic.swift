@@ -8,15 +8,15 @@ enum VirtualMic {
 
     static var bundled: URL? { Bundle.main.url(forResource: "IlusioMic", withExtension: "driver") }
 
-    /// AppleScript que copia o driver e reinicia o áudio do Mac. O caminho de origem entra só como string
-    /// escapada e passa por `quoted form of`, então não dá pra injetar comando pelo nome da pasta.
+    /// AppleScript que copia o driver e reinicia o áudio do Mac. Falha na cópia é erro; falha só no reinício, não.
+    /// O caminho de origem entra só como string escapada e passa por `quoted form of`, então não dá pra injetar comando pelo nome da pasta.
     static func installScript(source: String) -> String {
         let escaped = source.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
         return """
         set src to "\(escaped)"
         set dst to "\(installedPath)"
         do shell script "rm -rf " & quoted form of dst & " && ditto " & quoted form of src & " " & quoted form of dst & ¬
-            " && chown -R root:wheel " & quoted form of dst & " && killall coreaudiod" with administrator privileges
+            " && chown -R root:wheel " & quoted form of dst & " && (killall coreaudiod || true)" with administrator privileges
         """
     }
 

@@ -6,7 +6,7 @@ final class VirtualMicTests: XCTestCase {
         let script = VirtualMic.installScript(source: "/Applications/Ilusio.app/Contents/Resources/IlusioMic.driver")
         XCTAssertTrue(script.contains("quoted form of src"))
         XCTAssertTrue(script.contains("/Library/Audio/Plug-Ins/HAL/IlusioMic.driver"))
-        XCTAssertTrue(script.contains("killall coreaudiod"))
+        XCTAssertTrue(script.contains("&& (killall coreaudiod || true)"))  // cópia falhando ainda é erro; só o reinício é tolerado
         XCTAssertTrue(script.contains("with administrator privileges"))
     }
 

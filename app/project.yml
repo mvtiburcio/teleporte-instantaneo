@@ -43,7 +43,7 @@ targets:
         script: |
           set -e
           driver="$SRCROOT/IlusioMic/build/out/IlusioMic.driver"
-          [ -d "$driver" ] || "$SRCROOT/IlusioMic/build.sh"
+          [ -d "$driver" ] || "$SRCROOT/IlusioMic/build.sh" "${EXPANDED_CODE_SIGN_IDENTITY:--}"  # mesma assinatura do app
           mkdir -p "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH"
           rm -rf "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/IlusioMic.driver"
           ditto "$driver" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/IlusioMic.driver"
