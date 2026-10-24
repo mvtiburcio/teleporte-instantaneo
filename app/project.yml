@@ -55,6 +55,8 @@ targets:
           [ "$CONFIGURATION" = Release ] || exit 0
           engine="$SRCROOT/../build/engine/dist/ilusio-engine"
           [ -x "$engine/ilusio-engine" ] || { echo "error: motor não congelado: rode tools/congelar_motor.sh"; exit 1; }
+          fontes=$(cd "$SRCROOT/.." && shasum -a 256 teleporte.py ipc.py requirements.txt sons/teleport.wav | shasum -a 256 | cut -d' ' -f1)
+          [ "$(cat "$engine/.fontes" 2>/dev/null)" = "$fontes" ] || { echo "error: motor desatualizado: rode tools/congelar_motor.sh"; exit 1; }
           dest="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/engine"
           rm -rf "$dest" && mkdir -p "$dest"
           ditto "$engine" "$dest"

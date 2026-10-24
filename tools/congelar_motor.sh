@@ -13,4 +13,7 @@ rm -rf build/engine
   --add-data "$PWD/sons/teleport.wav:sons" \
   --exclude-module tkinter \
   teleporte.py
+# carimbo das fontes: o build Release do app recusa um motor congelado de código antigo
+shasum -a 256 teleporte.py ipc.py requirements.txt sons/teleport.wav | shasum -a 256 | cut -d' ' -f1 \
+  > build/engine/dist/ilusio-engine/.fontes
 echo "Pronto: build/engine/dist/ilusio-engine ($(du -sh build/engine/dist/ilusio-engine | cut -f1))"
