@@ -35,7 +35,7 @@ final class AppModel {
             lastError = "Sem permissão de câmera: libere em Ajustes > Privacidade e Segurança > Câmera."
             return
         }
-        guard let id = cameraID ?? CameraCapture.cameras().first?.uniqueID else {
+        guard let id = cameraID ?? Devices.pick(Devices.cameras(), saved: nil)?.id else {
             lastError = "Nenhuma câmera encontrada."
             return
         }
