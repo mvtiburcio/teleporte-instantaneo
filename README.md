@@ -246,7 +246,9 @@ Coisas não óbvias que apareceram no caminho e já estão tratadas no código:
 
 ```
 teleporte-instantaneo/
-├── teleporte.py           # o programa: gesto, efeito, câmera virtual e mixer de áudio
+├── teleporte.py           # o programa: gesto, efeito, câmera virtual e mixer de áudio (--ipc = modo app)
+├── ipc.py                 # ponte com o app: frames em memória compartilhada + comandos JSON
+├── tests/                 # unittest: .venv/bin/python -m unittest discover -s tests
 ├── teleporte              # lançador (esconde os logs internos do MediaPipe/CoreAudio)
 ├── setup.sh               # instala tudo
 ├── requirements.txt       # dependências Python fixadas
