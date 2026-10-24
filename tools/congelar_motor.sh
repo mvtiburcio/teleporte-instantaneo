@@ -11,7 +11,7 @@ rm -rf build/engine
   --distpath build/engine/dist --workpath build/engine/work --specpath build/engine \
   --collect-data mediapipe --collect-binaries mediapipe \
   --add-data "$PWD/sons/teleport.wav:sons" \
-  --exclude-module tkinter \
+  --exclude-module tkinter --exclude-module matplotlib \
   teleporte.py
 # carimbo das fontes: o build Release do app recusa um motor congelado de código antigo
 shasum -a 256 teleporte.py ipc.py requirements.txt sons/teleport.wav | shasum -a 256 | cut -d' ' -f1 \

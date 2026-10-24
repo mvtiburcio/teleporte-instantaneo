@@ -45,6 +45,22 @@ final class EngineClient: @unchecked Sendable {
         return (python, [repo.appendingPathComponent("teleporte.py").path, "--ipc"])
     }
 
+    /// Roda o motor uma vez sem comandos (stdin vazio: ele fica pronto e sai). Na primeira abertura depois de
+    /// instalar, o macOS verifica os ~200 binários do motor (~25 s); fazer isso no fundo deixa o "Ligar" rápido.
+    static func warmUp() {
+        guard let (exe, args) = command() else { return }
+        let p = Process()
+        p.executableURL = exe
+        p.arguments = args
+        p.standardInput = FileHandle.nullDevice
+        p.standardOutput = FileHandle.nullDevice
+        p.standardError = FileHandle.nullDevice
+        DispatchQueue.global(qos: .utility).async {  // espera a saída: coleta o processo sem travar a abertura
+            try? p.run()
+            p.waitUntilExit()
+        }
+    }
+
     func start(executable: URL, arguments: [String], log: URL) throws {
         try FileManager.default.createDirectory(at: log.deletingLastPathComponent(), withIntermediateDirectories: true)
         if !FileManager.default.fileExists(atPath: log.path) { FileManager.default.createFile(atPath: log.path, contents: nil) }

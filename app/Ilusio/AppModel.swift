@@ -70,7 +70,8 @@ final class AppModel {
         }
         refreshChecks()
         // app atualizado: o macOS só troca a extensão quando o app pede (mesma versão = nada acontece)
-        if VirtualCamera.isInstalled { activateCamera(quiet: true) }  // só a Ilusio Camera: com só o OBS, não pede nada
+        if VirtualCamera.isInstalled { activateCamera(quiet: true) }
+        if Bundle.main.bundlePath.hasPrefix("/Applications/") { EngineClient.warmUp() }  // só no app instalado  // só a Ilusio Camera: com só o OBS, não pede nada
         Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in  // permissão dada em Ajustes, câmera aprovada...
             MainActor.assumeIsolated { self?.refreshChecks() }
         }
