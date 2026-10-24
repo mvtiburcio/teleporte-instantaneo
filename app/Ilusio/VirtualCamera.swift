@@ -1,3 +1,4 @@
+import AVFoundation
 import CoreMediaIO
 import Foundation
 import SystemExtensions
@@ -7,12 +8,19 @@ enum VirtualCamera {
     static let extensionID = "com.mvtiburcio.ilusio.camera"
     static let deviceName = "Ilusio Camera"
 
+    /// A "Ilusio Camera" já foi aprovada alguma vez (o OBS não conta).
+    static var isInstalled: Bool {
+        AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified)
+            .devices.contains { $0.localizedName == deviceName }
+    }
+
     /// O macOS só ativa system extensions de apps que estão em /Applications.
     static var appIsInApplications: Bool { Bundle.main.bundlePath.hasPrefix("/Applications/") }
 }
 
 /// Pede ao macOS pra instalar/atualizar a extensão; a pessoa aprova uma vez em Ajustes do Sistema.
 final class CameraActivation: NSObject, OSSystemExtensionRequestDelegate {
+    static let doneText = "Câmera do Ilusio ativada."
     private let done: @MainActor (String) -> Void
 
     init(done: @escaping @MainActor (String) -> Void) {
@@ -39,7 +47,7 @@ final class CameraActivation: NSObject, OSSystemExtensionRequestDelegate {
     }
 
     func request(_ request: OSSystemExtensionRequest, didFinishWithResult result: OSSystemExtensionRequest.Result) {
-        report(result == .willCompleteAfterReboot ? "Reinicie o Mac para terminar de ativar a câmera." : "Câmera do Ilusio ativada.")
+        report(result == .willCompleteAfterReboot ? "Reinicie o Mac para terminar de ativar a câmera." : Self.doneText)
     }
 
     func request(_ request: OSSystemExtensionRequest, didFailWithError error: Error) {

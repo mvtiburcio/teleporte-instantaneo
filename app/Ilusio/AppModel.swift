@@ -69,6 +69,8 @@ final class AppModel {
             registerShortcut(action)
         }
         refreshChecks()
+        // app atualizado: o macOS só troca a extensão quando o app pede (mesma versão = nada acontece)
+        if VirtualCamera.isInstalled { activateCamera(quiet: true) }  // só a Ilusio Camera: com só o OBS, não pede nada
         Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in  // permissão dada em Ajustes, câmera aprovada...
             MainActor.assumeIsolated { self?.refreshChecks() }
         }
@@ -180,13 +182,14 @@ final class AppModel {
     }
 
     /// Instala/atualiza a "Ilusio Camera"; a pessoa aprova uma vez em Ajustes do Sistema.
-    func activateCamera() {
+    /// `quiet`: na abertura do app, só pra trocar a câmera instalada pela desta versão; o sucesso não aparece.
+    func activateCamera(quiet: Bool = false) {
         guard VirtualCamera.appIsInApplications else {
-            cameraMessage = "Mova o Ilusio para a pasta Aplicativos e abra de novo: o macOS só ativa a câmera de lá."
+            if !quiet { cameraMessage = "Mova o Ilusio para a pasta Aplicativos e abra de novo: o macOS só ativa a câmera de lá." }
             return
         }
         let activation = CameraActivation { [weak self] text in
-            self?.cameraMessage = text
+            if !(quiet && text == CameraActivation.doneText) { self?.cameraMessage = text }
             self?.refreshChecks()
         }
         self.activation = activation
