@@ -1,4 +1,11 @@
-# Teletransporte Instantâneo 🫰⚡
+# Teletransporte Instantâneo ⚡
+
+<p>
+  <img src="https://img.shields.io/badge/macOS-13%2B-000000?logo=apple&logoColor=white" alt="macOS 13+">
+  <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
+  <img src="https://img.shields.io/badge/MediaPipe-0.10.14-0097A7" alt="MediaPipe 0.10.14">
+  <img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green" alt="Licença MIT">
+</p>
 
 Faça o **Teletransporte Instantâneo do Goku** numa videochamada de verdade: coloque **dois dedos na testa**, ouça o *"vuush"* e **suma da câmera** — com os riscos verticais clássicos do anime. Faça o gesto de novo e você **reaparece**, de onde estiver.
 
@@ -8,10 +15,23 @@ Testado no **Google Meet**. Deve funcionar também no **WhatsApp (app do Mac), Z
   <img src="docs/img/efeito.gif" alt="Demonstração: a pessoa é coberta por riscos verticais, pisca e some, ficando só o fundo; depois reaparece" width="640">
 </p>
 
+## Início rápido
+
+```bash
+git clone https://github.com/mvtiburcio/teleporte-instantaneo.git
+cd teleporte-instantaneo
+./setup.sh      # instala tudo (uma vez)
+./teleporte     # roda
+```
+
+Na chamada: câmera **OBS Virtual Camera**, microfone **BlackHole 2ch**. Na janela *teleporte*: **B** grava o fundo, **dois dedos na testa** some e volta.
+Primeira vez? Siga também a [configuração única do OBS](#configuração-única-do-obs).
+
 ---
 
 ## Sumário
 
+- [Início rápido](#início-rápido)
 - [Como funciona](#como-funciona)
 - [Requisitos](#requisitos)
 - [Instalação](#instalação)
