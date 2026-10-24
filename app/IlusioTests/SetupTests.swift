@@ -18,4 +18,11 @@ final class SetupTests: XCTestCase {
         c.gesture = true  // fora de ordem: o fundo ainda vem antes
         XCTAssertEqual(c.firstPending, .background)
     }
+
+    func testOBSeBlackHoleNaoContamComoProntos() {
+        XCTAssertFalse(SetupChecks.hasOwn(["Câmera FaceTime HD", "OBS Virtual Camera"], SetupChecks.virtualCameraNames))
+        XCTAssertTrue(SetupChecks.hasOwn(["OBS Virtual Camera", "Ilusio Camera"], SetupChecks.virtualCameraNames))
+        XCTAssertFalse(SetupChecks.hasOwn(["BlackHole 2ch", "Microfone (MacBook Air)"], SetupChecks.virtualAudioNames))
+        XCTAssertTrue(SetupChecks.hasOwn(["Ilusio Mic"], SetupChecks.virtualAudioNames))
+    }
 }
