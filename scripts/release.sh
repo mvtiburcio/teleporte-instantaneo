@@ -56,7 +56,8 @@ xcodebuild -quiet -exportArchive -archivePath "$OUT/Ilusio.xcarchive" -exportPat
   -exportOptionsPlist scripts/ExportOptions.plist -allowProvisioningUpdates
 APP="$OUT/export/Ilusio.app"
 codesign --verify --deep --strict "$APP"
-codesign -dv "$APP" 2>&1 | grep -q "Authority=Developer ID Application" || { echo "app não saiu com Developer ID" >&2; exit 1; }
+sig=$(codesign -dvv "$APP" 2>&1)  # sem pipe: com pipefail, o grep -q cortaria o codesign (SIGPIPE)
+[[ $sig == *"Authority=Developer ID Application"* ]] || { echo "app não saiu com Developer ID" >&2; exit 1; }
 
 if [ $NOTARIZE = 1 ]; then
   echo "==> 4/6 notarização do app"
