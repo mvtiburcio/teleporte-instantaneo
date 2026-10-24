@@ -55,7 +55,10 @@ final class EngineClient: @unchecked Sendable {
         p.standardInput = FileHandle.nullDevice
         p.standardOutput = FileHandle.nullDevice
         p.standardError = FileHandle.nullDevice
-        try? p.run()
+        DispatchQueue.global(qos: .utility).async {  // espera a saída: coleta o processo sem travar a abertura
+            try? p.run()
+            p.waitUntilExit()
+        }
     }
 
     func start(executable: URL, arguments: [String], log: URL) throws {
