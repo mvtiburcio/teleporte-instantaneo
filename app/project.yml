@@ -1,4 +1,4 @@
-name: Teleporte
+name: Ilusio
 options:
   bundleIdPrefix: com.mvtiburcio
   deploymentTarget:
@@ -13,42 +13,43 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     ARCHS: arm64
 targets:
-  Teleporte:
+  Ilusio:
     type: application
     platform: macOS
-    sources: [Teleporte]
+    sources: [Ilusio]
     info:
-      path: Teleporte/Info.plist
+      path: Ilusio/Info.plist
       properties:
-        CFBundleDisplayName: Teleporte
+        CFBundleDisplayName: Ilusio
         LSApplicationCategoryType: public.app-category.entertainment
-        NSCameraUsageDescription: O Teleporte usa a câmera para reconhecer o gesto e aplicar o efeito.
-        NSMicrophoneUsageDescription: O Teleporte mistura o seu microfone com o som do teletransporte para a chamada ouvir.
-        TeleporteRepoDir: $(TELEPORTE_REPO_DIR)
+        NSCameraUsageDescription: O Ilusio usa a câmera para reconhecer o gesto e aplicar o efeito.
+        NSMicrophoneUsageDescription: O Ilusio mistura o seu microfone com o som do teletransporte para a chamada ouvir.
+        IlusioRepoDir: $(ILUSIO_REPO_DIR)
         PixKey: $(PIX_KEY)
         PixName: $(PIX_NAME)
         PixCity: $(PIX_CITY)
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.mvtiburcio.teleporte
+        PRODUCT_BUNDLE_IDENTIFIER: com.mvtiburcio.ilusio
         # doação (aba Apoiar): chave Pix aleatória, pública por natureza
         PIX_KEY: d1fef5be-4e51-4a50-86fb-8810cb8bfcd4
-        PIX_NAME: TELEPORTE INSTANTANEO
+        PIX_NAME: ILUSIO
         PIX_CITY: RECIFE
         GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
       configs:
         Debug:
-          TELEPORTE_REPO_DIR: $(SRCROOT)/..
+          ILUSIO_REPO_DIR: $(SRCROOT)/..
         Release:
-          TELEPORTE_REPO_DIR: ""
+          ILUSIO_REPO_DIR: ""
     scheme:
-      testTargets: [TeleporteTests]
-  TeleporteTests:
+      testTargets: [IlusioTests]
+  IlusioTests:
     type: bundle.unit-test
     platform: macOS
-    sources: [TeleporteTests]
+    sources: [IlusioTests]
     dependencies:
-      - target: Teleporte
+      - target: Ilusio
     settings:
       base:
         GENERATE_INFOPLIST_FILE: YES

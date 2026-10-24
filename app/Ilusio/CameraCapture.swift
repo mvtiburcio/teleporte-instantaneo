@@ -5,7 +5,7 @@ enum CaptureError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notFound: "Câmera não encontrada."
-        case .unsupported: "Esta câmera não aceita o formato de vídeo do Teleporte."
+        case .unsupported: "Esta câmera não aceita o formato de vídeo do Ilusio."
         }
     }
 }
@@ -13,7 +13,7 @@ enum CaptureError: LocalizedError {
 /// Captura a câmera escolhida (ver Devices) em BGRA no tamanho do FrameBuffer e escreve cada frame no slot in.
 final class CameraCapture: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate, @unchecked Sendable {
     private let session = AVCaptureSession()
-    private let queue = DispatchQueue(label: "teleporte.camera")
+    private let queue = DispatchQueue(label: "ilusio.camera")
     private let buffer: FrameBuffer
 
     init(buffer: FrameBuffer) {

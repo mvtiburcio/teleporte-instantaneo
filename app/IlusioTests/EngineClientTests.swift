@@ -1,5 +1,5 @@
 import XCTest
-@testable import Teleporte
+@testable import Ilusio
 
 @MainActor
 final class EngineClientTests: XCTestCase {
@@ -13,7 +13,7 @@ final class EngineClientTests: XCTestCase {
     }
 
     func testLinhaInvalidaViraNil() {
-        XCTAssertNil(EngineEvent.parse("Microfone 'X' + teleporte"))
+        XCTAssertNil(EngineEvent.parse("Microfone 'X' + efeito"))
         XCTAssertNil(EngineEvent.parse(#"{"sem": "event"}"#))
     }
 

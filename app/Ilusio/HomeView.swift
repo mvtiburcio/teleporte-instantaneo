@@ -8,7 +8,7 @@ struct HomeView: View {
             preview
             GlassEffectContainer(spacing: 12) {
                 HStack(spacing: 12) {
-                    Button(model.running ? "Desligar" : "Ligar teleporte", systemImage: model.running ? "stop.fill" : "sparkles") {
+                    Button(model.running ? "Desligar" : "Ligar o Ilusio", systemImage: model.running ? "stop.fill" : "sparkles") {
                         Task { await model.toggleRunning() }
                     }
                     .buttonStyle(.glassProminent)
@@ -45,7 +45,7 @@ struct HomeView: View {
                     .resizable()
                     .scaleEffect(x: -1, y: 1)  // espelhada, como num espelho; a chamada recebe sem espelhar
             } else {
-                Text(model.running ? "Iniciando…" : "Ligue o teleporte para ver a prévia")
+                Text(model.running ? "Iniciando…" : "Ligue o Ilusio para ver a prévia")
                     .foregroundStyle(.secondary)
             }
         }
@@ -139,7 +139,7 @@ struct HomeView: View {
     }
 }
 
-/// Seletor de câmera sobre a prévia: troca ao vivo, sem desligar o teleporte.
+/// Seletor de câmera sobre a prévia: troca ao vivo, sem desligar o Ilusio.
 struct CameraMenu: View {
     @Environment(AppModel.self) private var model
 

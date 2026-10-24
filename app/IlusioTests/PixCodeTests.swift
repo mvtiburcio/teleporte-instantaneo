@@ -1,5 +1,5 @@
 import XCTest
-@testable import Teleporte
+@testable import Ilusio
 
 final class PixCodeTests: XCTestCase {
     func testCRC16VetorPadrao() {
@@ -21,6 +21,6 @@ final class PixCodeTests: XCTestCase {
     func testPayloadConfiguradoNoApp() {
         // conferido com implementação independente em Python; muda só se PIX_KEY/NAME/CITY mudarem no project.yml
         XCTAssertEqual(PixCode.configured, "00020126580014br.gov.bcb.pix0136d1fef5be-4e51-4a50-86fb-8810cb8bfcd4"
-                       + "5204000053039865802BR5921TELEPORTE INSTANTANEO6006RECIFE62070503***6304EBC0")
+                       + "5204000053039865802BR5906ILUSIO6006RECIFE62070503***63048C40")
     }
 }

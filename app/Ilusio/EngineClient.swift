@@ -29,8 +29,8 @@ final class EngineClient: @unchecked Sendable {
     private var pending = Data()  // só mexido na fila do readabilityHandler
 
     /// Executável e argumentos do motor: empacotado no app (release) ou o .venv do repositório (desenvolvimento).
-    static func command(repoDir: String? = Bundle.main.object(forInfoDictionaryKey: "TeleporteRepoDir") as? String) -> (URL, [String])? {
-        if let bundled = Bundle.main.url(forResource: "teleporte-engine", withExtension: nil, subdirectory: "engine") {
+    static func command(repoDir: String? = Bundle.main.object(forInfoDictionaryKey: "IlusioRepoDir") as? String) -> (URL, [String])? {
+        if let bundled = Bundle.main.url(forResource: "ilusio-engine", withExtension: nil, subdirectory: "engine") {
             return (bundled, ["--ipc"])
         }
         guard let repoDir, !repoDir.isEmpty else { return nil }

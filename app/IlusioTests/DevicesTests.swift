@@ -1,5 +1,5 @@
 import XCTest
-@testable import Teleporte
+@testable import Ilusio
 
 final class DevicesTests: XCTestCase {
     let iphone = Devices.Item(id: "iphone", name: "iPhone de Marcus Camera", builtIn: false)
@@ -24,7 +24,7 @@ final class DevicesTests: XCTestCase {
     }
 
     func testVirtuaisFicamDeFora() {
-        for name in ["OBS Virtual Camera", "Teleporte Camera", "BlackHole 2ch", "Teleporte Mic"] {
+        for name in ["OBS Virtual Camera", "Ilusio Camera", "BlackHole 2ch", "Ilusio Mic"] {
             XCTAssertTrue(Devices.isVirtual(name), name)
         }
         XCTAssertFalse(Devices.isVirtual("FaceTime HD Camera"))

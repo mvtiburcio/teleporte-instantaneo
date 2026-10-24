@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct TeleporteApp: App {
+struct IlusioApp: App {
     @State private var model = AppModel()
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
 
@@ -10,7 +10,7 @@ struct TeleporteApp: App {
     }
 
     var body: some Scene {
-        WindowGroup("Teleporte") {
+        WindowGroup("Ilusio") {
             ContentView()
                 .environment(model)
                 .onAppear { delegate.model = model }

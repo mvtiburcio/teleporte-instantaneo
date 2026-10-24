@@ -18,8 +18,8 @@ struct SetupChecks: Equatable {
     var gesture = false
     var callApp = false
 
-    static let virtualCameraNames = ["OBS Virtual Camera", "Teleporte Camera"]
-    static let virtualAudioNames = ["BlackHole", "Teleporte Mic"]
+    static let virtualCameraNames = ["OBS Virtual Camera", "Ilusio Camera"]
+    static let virtualAudioNames = ["BlackHole", "Ilusio Mic"]
 
     static func current(background: Bool, gesture: Bool, callApp: Bool) -> SetupChecks {
         let video = AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified)

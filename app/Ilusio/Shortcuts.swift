@@ -54,7 +54,7 @@ enum ShortcutAction: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .toggle: "Sumir / voltar"
-        case .power: "Ligar / desligar o teleporte"
+        case .power: "Ligar / desligar o Ilusio"
         case .background: "Gravar o fundo"
         case .reappear: "Reaparecer na hora (sem efeito)"
         }
