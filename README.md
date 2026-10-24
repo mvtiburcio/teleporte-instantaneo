@@ -303,7 +303,7 @@ teleporte-instantaneo/
 ├── setup.sh               # instala tudo
 ├── requirements.txt       # dependências Python fixadas
 ├── sons/goku-teleport.mp3 # som original (o teleport.wav é gerado a partir dele)
-├── tools/                 # preparar_som.py e gerar_demo.py (rosto pixelado nas imagens)
+├── tools/                 # preparar_som.py, gerar_demo.py e congelar_motor.sh (motor dentro do app)
 └── docs/                  # imagens do README, spec e planos de cada PR
 ```
 
@@ -312,6 +312,15 @@ Testes:
 ```bash
 .venv/bin/python -m unittest discover -s tests          # motor
 cd app && xcodebuild test -project Ilusio.xcodeproj -scheme Ilusio -destination 'platform=macOS,arch=arm64'
+```
+
+Para gerar o app completo (Release), que leva o motor congelado e não precisa de Python:
+
+```bash
+.venv/bin/pip install -r requirements-dev.txt   # PyInstaller
+tools/congelar_motor.sh                          # build/engine/dist/ilusio-engine (~250 MB)
+ILUSIO_ENGINE=$PWD/build/engine/dist/ilusio-engine/ilusio-engine .venv/bin/python -m unittest tests.test_engine_smoke
+cd app && xcodebuild -project Ilusio.xcodeproj -scheme Ilusio -configuration Release build
 ```
 
 O desenho do app está em `docs/superpowers/specs/2026-10-24-app-macos-design.md`. Cada PR tem o seu plano em `docs/superpowers/plans/`.

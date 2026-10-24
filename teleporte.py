@@ -7,7 +7,9 @@ import pyvirtualcam
 import sounddevice as sd
 from ipc import FrameShm, parse_command, emit
 
-SOUND = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sons", "teleport.wav")  # gerado por tools/preparar_som.py
+# congelado (PyInstaller, dentro do Ilusio.app) os arquivos ficam em sys._MEIPASS; senão, ao lado deste arquivo
+BASE = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+SOUND = os.path.join(BASE, "sons", "teleport.wav")  # gerado por tools/preparar_som.py
 SOUND_LEAD = 0.1  # do disparo até o "vuush" do som: o efeito começa nesse ponto
 FX_S = 0.9        # duração do efeito, casada com o som
 HOLD_S = 0.25     # quanto tempo segurar o gesto pra disparar

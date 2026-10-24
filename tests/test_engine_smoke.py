@@ -9,7 +9,10 @@ class EngineSmokeTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "frames.shm")
             shm = FrameShm(path, 1280, 720, create=True)
-            p = subprocess.Popen([sys.executable, os.path.join(ROOT, "teleporte.py"), "--ipc"],
+            # ILUSIO_ENGINE aponta pro motor congelado (tools/congelar_motor.sh); sem ela, roda o teleporte.py
+            engine = os.environ.get("ILUSIO_ENGINE")
+            cmd = [engine] if engine else [sys.executable, os.path.join(ROOT, "teleporte.py")]
+            p = subprocess.Popen(cmd + ["--ipc"],
                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
             watchdog = threading.Timer(60, p.kill)  # readline bloqueia pra sempre se o motor não responder
             watchdog.start()
