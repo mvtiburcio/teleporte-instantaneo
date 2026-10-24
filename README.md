@@ -288,7 +288,7 @@ O mesmo Pix está na aba **Apoiar** do app. Também ajuda muito dar uma ⭐ no r
 - [x] App para Mac: Início, Câmera e mic, Configuração guiada, Atalhos globais, Apoiar, Ajustes e tour de primeiro acesso
 - [x] Câmera virtual própria (**Ilusio Camera**), sem precisar do OBS
 - [x] Microfone virtual próprio (**Ilusio Mic**), sem precisar instalar o BlackHole
-- [ ] `.dmg` assinado e notarizado nas Releases
+- [x] `.dmg` assinado com Developer ID e notarizado (`scripts/release.sh`); publicação nas Releases em breve
 - [ ] Novos efeitos com gestos. Tem uma ideia? [Abra uma issue](https://github.com/mvtiburcio/teleporte-instantaneo/issues).
 
 ## Contribuir
@@ -321,6 +321,13 @@ Para gerar o app completo (Release), que leva o motor congelado e não precisa d
 tools/congelar_motor.sh                          # build/engine/dist/ilusio-engine (~250 MB)
 ILUSIO_ENGINE=$PWD/build/engine/dist/ilusio-engine/ilusio-engine .venv/bin/python -m unittest tests.test_engine_smoke
 cd app && xcodebuild -project Ilusio.xcodeproj -scheme Ilusio -configuration Release build
+```
+
+Para gerar o `.dmg` de release (Developer ID da TKI, notarizado e grampeado; a release no GitHub sai como **rascunho**):
+
+```bash
+scripts/release.sh 0.1.0                  # tudo, com rascunho no GitHub
+scripts/release.sh 0.1.0 --sem-publicar   # só o .dmg notarizado
 ```
 
 O desenho do app está em `docs/superpowers/specs/2026-10-24-app-macos-design.md`. Cada PR tem o seu plano em `docs/superpowers/plans/`.
