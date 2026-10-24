@@ -10,3 +10,4 @@ sons/teleport.wav
 app/Teleporte.xcodeproj/
 app/Local.xcconfig
 app/build/
+app/Teleporte/Info.plist
