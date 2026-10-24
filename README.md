@@ -8,6 +8,7 @@
 <p align="center"><b>Efeitos mágicos para a sua câmera nas videochamadas, controlados por gestos.</b></p>
 
 <p align="center">
+  <a href="https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest"><img src="https://img.shields.io/github/v/release/mvtiburcio/teleporte-instantaneo?label=vers%C3%A3o&color=FF8A1F" alt="Última versão"></a>
   <img src="https://img.shields.io/badge/app-macOS%2026%2B-000000?logo=apple&logoColor=white" alt="App: macOS 26+">
   <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
   <img src="https://img.shields.io/badge/MediaPipe-0.10.14-0097A7" alt="MediaPipe 0.10.14">
@@ -23,15 +24,22 @@ O primeiro efeito é o **Teletransporte Instantâneo**, inspirado no Goku: coloq
   <img src="docs/img/efeito.gif" alt="Demonstração: a pessoa é coberta por riscos verticais, pisca e some, ficando só o fundo; depois reaparece" width="640">
 </p>
 
+<p align="center">
+  <a href="https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest"><img src="https://img.shields.io/badge/Baixar_o_Ilusio-macOS_26%2B_%C2%B7_Apple_Silicon-FF8A1F?style=for-the-badge&logo=apple&logoColor=white" alt="Baixar o Ilusio para Mac" height="44"></a>
+</p>
+<p align="center">Grátis · assinado e notarizado pela Apple · sem instalar mais nada<br>
+Prefere o terminal? Veja <a href="#usar-pela-linha-de-comando">Usar pela linha de comando</a>.</p>
+
 ---
 
 ## Sumário
 
-- [Duas formas de usar](#duas-formas-de-usar)
-- [App para Mac](#app-para-mac)
+- [Como você quer usar?](#como-você-quer-usar)
+- [Baixar e instalar o app](#baixar-e-instalar-o-app)
+- [Usando o app](#usando-o-app)
 - [Efeito: Teletransporte Instantâneo](#efeito-teletransporte-instantâneo)
 - [Como funciona](#como-funciona)
-- [Modo terminal](#modo-terminal)
+- [Usar pela linha de comando](#usar-pela-linha-de-comando)
 - [Solução de problemas](#solução-de-problemas)
 - [Por dentro: problemas resolvidos](#por-dentro-problemas-resolvidos)
 - [Apoie o projeto](#apoie-o-projeto)
@@ -41,31 +49,44 @@ O primeiro efeito é o **Teletransporte Instantâneo**, inspirado no Goku: coloq
 
 ---
 
-## Duas formas de usar
+## Como você quer usar?
 
-| | **App para Mac** (recomendado) | **Modo terminal** |
+| | **App para Mac** (recomendado) | **Linha de comando** |
 |---|---|---|
-| Para quem | Qualquer pessoa | Quem programa ou tem macOS mais antigo |
+| Para quem | Qualquer pessoa | Quem programa, quer mexer no código ou tem macOS mais antigo |
+| Como instala | [Baixa o `.dmg`](https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest) e arrasta para Aplicativos | `git clone` + `./setup.sh` |
 | Sistema | macOS 26+, Apple Silicon | macOS 13+ (Apple Silicon ou Intel) |
-| Câmera virtual | **Ilusio Camera**, ativada no checklist | OBS Virtual Camera |
-| Microfone virtual | **Ilusio Mic**, instalado no checklist (senha uma vez) | BlackHole 2ch |
-| Configuração | Tour + checklist guiado, tudo na tela | `./setup.sh` + configuração do OBS |
+| Precisa instalar mais algo? | Não: câmera e microfone virtuais vêm dentro do app | Sim: Homebrew, Python 3.12, OBS e BlackHole (o `setup.sh` instala) |
+| Câmera na chamada | **Ilusio Camera** | OBS Virtual Camera |
+| Microfone na chamada | **Ilusio Mic** | BlackHole 2ch |
+| Configuração | Tour + checklist guiado, tudo na tela | Configuração única do OBS |
 | Atalhos | Globais (funcionam com a chamada em primeiro plano) | Teclas na janela de prévia |
-| Status | Em desenvolvimento; `.dmg` assinado em breve nas [Releases](https://github.com/mvtiburcio/teleporte-instantaneo/releases) | Pronto |
 
-## App para Mac
+## Baixar e instalar o app
+
+**Requisitos:** Mac com Apple Silicon (M1 ou mais novo), macOS 26 ou mais novo e uma webcam (a do próprio Mac serve).
+
+1. Baixe o **`Ilusio-<versão>.dmg`** na [última versão](https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest).
+2. Abra o `.dmg` e **arraste o Ilusio para a pasta Aplicativos**. Ele precisa estar lá: o macOS só ativa a câmera virtual de apps instalados em Aplicativos.
+3. Abra o **Ilusio**. Um tour curto explica o app e termina no **checklist da Configuração**, que guia o resto em uns 5 minutos. Cada item fica verde sozinho:
+   1. Permitir a câmera e o microfone (aviso padrão do macOS).
+   2. **Ativar a Ilusio Camera**: o macOS pede para aprovar a extensão em *Ajustes do Sistema → Geral → Itens de Início e Extensões → Extensões de Câmera*.
+   3. **Instalar o Ilusio Mic**: o macOS pede a sua senha de administrador, uma vez só.
+   4. Gravar o fundo, testar o gesto e escolher **Ilusio Camera** e **Ilusio Mic** no app de chamada (o checklist mostra onde clicar no Meet, Zoom, Teams e WhatsApp).
+
+O app é assinado com Developer ID e notarizado pela Apple, então abre sem aviso de "desenvolvedor não identificado". Para conferir o download: `shasum -a 256 -c Ilusio-<versão>.dmg.sha256`.
+
+**Atualizar:** baixe a versão nova e substitua o Ilusio em Aplicativos.
+
+**Desinstalar:** arraste o Ilusio de Aplicativos para o Lixo; o macOS remove a Ilusio Camera junto. O microfone sai com:
+
+```bash
+sudo rm -rf /Library/Audio/Plug-Ins/HAL/IlusioMic.driver && sudo killall coreaudiod
+```
+
+## Usando o app
 
 Interface em SwiftUI com o visual Liquid Glass do macOS 26.
-
-**Primeiro acesso.** Um tour de 4 passos explica o que é o Ilusio, como funciona e qual é o gesto. Depois, o **checklist da Configuração** deixa tudo pronto em uns 5 minutos. Cada item fica verde sozinho:
-
-1. Permitir a câmera
-2. Permitir o microfone
-3. Ativar a câmera virtual (**Ilusio Camera**, sem OBS)
-4. Instalar o microfone virtual (**Ilusio Mic**, sem BlackHole)
-5. Gravar o fundo
-6. Testar o gesto
-7. Escolher a câmera e o microfone no app de chamada (com instruções para Meet, Zoom, Teams e WhatsApp)
 
 **Abas.**
 
@@ -86,17 +107,6 @@ Interface em SwiftUI com o visual Liquid Glass do macOS 26.
 | `⌃⌥L` | Ligar / desligar o Ilusio |
 | `⌃⌥B` | Gravar o fundo |
 | `⌃⌥R` | Reaparecer na hora (sem efeito) |
-
-**Rodar a partir do código** (enquanto o `.dmg` não sai). Precisa de macOS 26+, Xcode e `brew install xcodegen`:
-
-```bash
-git clone https://github.com/mvtiburcio/teleporte-instantaneo.git
-cd teleporte-instantaneo
-./setup.sh                                   # o app usa o motor em Python do .venv
-cd app && xcodegen generate && open Ilusio.xcodeproj
-```
-
-Opcional: crie `app/Local.xcconfig` (fora do git) com `CODE_SIGN_IDENTITY` e `DEVELOPMENT_TEAM` da sua conta Apple. Assim o macOS lembra a permissão de câmera entre builds.
 
 ## Efeito: Teletransporte Instantâneo
 
@@ -132,12 +142,14 @@ O efeito dura **0,9 s** e acompanha o som:
   <img src="docs/img/arquitetura.svg" alt="Diagrama: webcam e microfone entram no motor; o vídeo sai por uma câmera virtual e o áudio por um microfone virtual, ambos indo para a chamada" width="900">
 </p>
 
-1. **Vídeo.** O motor (`teleporte.py`) procura o gesto com o **MediaPipe** (mão + rosto). Quando ele dispara, o motor recorta a sua silhueta e aplica o efeito. O resultado sai por uma **câmera virtual**, que a chamada enxerga como uma câmera normal: no app, a **Ilusio Camera** (uma extensão de câmera do macOS, aprovada uma vez no checklist); no modo terminal, a OBS Virtual Camera.
-2. **Áudio.** As chamadas **cortam** o que sai do alto-falante (cancelamento de eco), então tocar o som no Mac não basta. O motor vira o seu microfone: mistura o microfone de verdade com o som do efeito e manda tudo para um **microfone virtual**: no app, o **Ilusio Mic**, que vai dentro do app; no modo terminal, o BlackHole 2ch.
+1. **Vídeo.** O motor (`teleporte.py`) procura o gesto com o **MediaPipe** (mão + rosto). Quando ele dispara, o motor recorta a sua silhueta e aplica o efeito. O resultado sai por uma **câmera virtual**, que a chamada enxerga como uma câmera normal: no app, a **Ilusio Camera** (uma extensão de câmera do macOS, aprovada uma vez no checklist); na linha de comando, a OBS Virtual Camera.
+2. **Áudio.** As chamadas **cortam** o que sai do alto-falante (cancelamento de eco), então tocar o som no Mac não basta. O motor vira o seu microfone: mistura o microfone de verdade com o som do efeito e manda tudo para um **microfone virtual**: no app, o **Ilusio Mic**, que vai dentro do app; na linha de comando, o BlackHole 2ch.
 3. **Sumir.** Enquanto você está "teleportado", a chamada recebe a **foto do fundo** gravada antes, sem sombra nem contorno.
 4. **No app.** O app captura a câmera escolhida e troca os frames com o motor por **memória compartilhada** (`ipc.py`). Os comandos e eventos vão em JSON por linha. A prévia, os atalhos e o checklist ficam no app; o efeito, no motor.
 
-## Modo terminal
+## Usar pela linha de comando
+
+Para quem programa ou quer mexer no efeito. Funciona também em Macs Intel e no macOS 13+, usando o OBS e o BlackHole como câmera e microfone virtuais.
 
 ### Início rápido
 
@@ -258,7 +270,7 @@ O script converte para `sons/teleport.wav` e **corta o silêncio do começo**, d
 
 Coisas não óbvias que apareceram no caminho e já estão tratadas no código:
 
-- **A câmera virtual "rouba" o índice 0.** No modo terminal, a OBS Virtual Camera entra na lista do OpenCV e a webcam muda de índice. O `open_webcam()` manda magenta para a câmera virtual e fica com a primeira câmera que devolve **outra** coisa. O app escapa disso capturando a câmera pelo identificador do AVFoundation.
+- **A câmera virtual "rouba" o índice 0.** Na linha de comando, a OBS Virtual Camera entra na lista do OpenCV e a webcam muda de índice. O `open_webcam()` manda magenta para a câmera virtual e fica com a primeira câmera que devolve **outra** coisa. O app escapa disso capturando a câmera pelo identificador do AVFoundation.
 - **Microfone e BlackHole num fluxo só devolvem lixo (`NaN`).** São dois dispositivos com relógios diferentes. A solução foram dois fluxos ligados por uma fila curta, que descarta blocos antigos para o atraso não crescer.
 - **BlackHole a 48 kHz.** Com outra taxa, o CoreAudio reclama; o som é reamostrado para 48 kHz ao carregar.
 - **Desempenho.** Mão e rosto custam ~25 ms por frame no M2, então a detecção roda a cada 2 frames para manter 30 fps. A segmentação da silhueta só roda durante o efeito.
@@ -288,7 +300,7 @@ O mesmo Pix está na aba **Apoiar** do app. Também ajuda muito dar uma ⭐ no r
 - [x] App para Mac: Início, Câmera e mic, Configuração guiada, Atalhos globais, Apoiar, Ajustes e tour de primeiro acesso
 - [x] Câmera virtual própria (**Ilusio Camera**), sem precisar do OBS
 - [x] Microfone virtual próprio (**Ilusio Mic**), sem precisar instalar o BlackHole
-- [x] `.dmg` assinado com Developer ID e notarizado (`scripts/release.sh`); publicação nas Releases em breve
+- [x] `.dmg` assinado com Developer ID e notarizado, publicado nas [Releases](https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest)
 - [ ] Novos efeitos com gestos. Tem uma ideia? [Abra uma issue](https://github.com/mvtiburcio/teleporte-instantaneo/issues).
 
 ## Contribuir
@@ -299,7 +311,7 @@ teleporte-instantaneo/
 ├── ipc.py                 # ponte com o app: frames em memória compartilhada + comandos JSON
 ├── app/                   # app Ilusio em SwiftUI (gere o projeto com xcodegen)
 ├── tests/                 # testes do motor
-├── teleporte              # lançador do modo terminal (esconde os logs internos do MediaPipe/CoreAudio)
+├── teleporte              # lançador da linha de comando (esconde os logs internos do MediaPipe/CoreAudio)
 ├── setup.sh               # instala tudo
 ├── requirements.txt       # dependências Python fixadas
 ├── sons/goku-teleport.mp3 # som original (o teleport.wav é gerado a partir dele)
@@ -313,6 +325,15 @@ Testes:
 .venv/bin/python -m unittest discover -s tests          # motor
 cd app && xcodebuild test -project Ilusio.xcodeproj -scheme Ilusio -destination 'platform=macOS,arch=arm64'
 ```
+
+Para rodar o **app a partir do código** (macOS 26+, Xcode e `brew install xcodegen`), usando o motor em Python do `.venv`:
+
+```bash
+./setup.sh
+cd app && xcodegen generate && open Ilusio.xcodeproj
+```
+
+Opcional: crie `app/Local.xcconfig` (fora do git) com `CODE_SIGN_IDENTITY` e `DEVELOPMENT_TEAM` da sua conta Apple. Assim o macOS lembra a permissão de câmera entre builds.
 
 Para gerar o app completo (Release), que leva o motor congelado e não precisa de Python:
 
