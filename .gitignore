@@ -11,3 +11,6 @@ app/*.xcodeproj/
 app/Local.xcconfig
 app/build/
 app/Ilusio/Info.plist
+app/Ilusio/Ilusio.entitlements
+app/IlusioCamera/Info.plist
+app/IlusioCamera/IlusioCamera.entitlements

@@ -47,6 +47,9 @@ final class AppModel {
     @ObservationIgnored private var capture: CameraCapture?
     @ObservationIgnored private var frames: FrameBuffer?
     @ObservationIgnored private var timer: Timer?
+    @ObservationIgnored private var cameraFeed: CameraFeed?
+    @ObservationIgnored private var activation: CameraActivation?
+    var cameraMessage: String?  // retorno da ativação da câmera do Ilusio
     @ObservationIgnored private var lastOut: UInt64 = 0
     @ObservationIgnored private var outBytes = [UInt8](repeating: 0, count: width * height * 4)
 
@@ -64,7 +67,7 @@ final class AppModel {
             registerShortcut(action)
         }
         refreshChecks()
-        Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in  // permissão dada em Ajustes, OBS instalado...
+        Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in  // permissão dada em Ajustes, câmera aprovada...
             MainActor.assumeIsolated { self?.refreshChecks() }
         }
         NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
@@ -174,6 +177,20 @@ final class AppModel {
         }
     }
 
+    /// Instala/atualiza a "Ilusio Camera"; a pessoa aprova uma vez em Ajustes do Sistema.
+    func activateCamera() {
+        guard VirtualCamera.appIsInApplications else {
+            cameraMessage = "Mova o Ilusio para a pasta Aplicativos e abra de novo: o macOS só ativa a câmera de lá."
+            return
+        }
+        let activation = CameraActivation { [weak self] text in
+            self?.cameraMessage = text
+            self?.refreshChecks()
+        }
+        self.activation = activation
+        activation.submit()
+    }
+
     func toggleRunning() async {
         if running { stop() } else { await start() }
     }
@@ -210,10 +227,12 @@ final class AppModel {
                 lastError = "O motor parou (código \(code)). Detalhes em \(Self.logURL.path)."
             }
             try engine.start(executable: exe, arguments: args, log: Self.logURL)
-            var fields: [String: Any] = ["shm": shm, "gain": gain, "reach": reach]
+            // com a câmera própria instalada, o app entrega o vídeo; senão o motor manda pro OBS
+            let feed = CameraFeed(frames: frames)
+            var fields: [String: Any] = ["shm": shm, "gain": gain, "reach": reach, "vcam": feed == nil]
             if let micName { fields["mic"] = micName }
             engine.send("start", fields)
-            (self.frames, self.capture, self.engine, cameraID) = (frames, capture, engine, id)
+            (self.frames, self.capture, self.engine, self.cameraFeed, cameraID) = (frames, capture, engine, feed, id)
             running = true
             lastOut = 0
             timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 15, repeats: true) { [weak self] _ in
@@ -229,7 +248,8 @@ final class AppModel {
         timer?.invalidate()
         engine?.stop()
         capture?.stop()
-        (timer, engine, capture, frames) = (nil, nil, nil, nil)
+        cameraFeed?.stop()
+        (timer, engine, capture, frames, cameraFeed) = (nil, nil, nil, nil, nil)
         running = false
         micLevel = 0
         state = nil

@@ -57,11 +57,17 @@ final class FrameBuffer: @unchecked Sendable {
     }
 
     /// Copia o frame novo do slot para dst. Falso se não há frame novo ou se ele foi rasgado durante a cópia.
-    func read(_ s: Slot, last: inout UInt64, into dst: UnsafeMutableRawPointer) -> Bool {
+    /// bytesPerRow do destino pode ser maior que width*4 (CVPixelBuffer com linhas alinhadas).
+    func read(_ s: Slot, last: inout UInt64, into dst: UnsafeMutableRawPointer, bytesPerRow: Int? = nil) -> Bool {
         let v = seq(s)
         atomicMemoryFence(ordering: .acquiring)
         guard v & 1 == 0, v != last else { return false }
-        dst.copyMemory(from: slot(s), byteCount: slotSize)
+        let row = width * 4, dstRow = bytesPerRow ?? row
+        if dstRow == row {
+            dst.copyMemory(from: slot(s), byteCount: slotSize)
+        } else {
+            for y in 0..<height { (dst + y * dstRow).copyMemory(from: slot(s) + y * row, byteCount: row) }
+        }
         atomicMemoryFence(ordering: .acquiring)
         guard seq(s) == v else { return false }
         last = v

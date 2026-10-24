@@ -11,7 +11,6 @@ enum SetupItem: Int, CaseIterable, Identifiable {
 struct SetupChecks: Equatable {
     var camera = false
     var mic = false
-    var obsInstalled = false
     var virtualCamera = false
     var virtualAudio = false
     var background = false
@@ -29,7 +28,6 @@ struct SetupChecks: Equatable {
         return SetupChecks(
             camera: AVCaptureDevice.authorizationStatus(for: .video) == .authorized,
             mic: AVCaptureDevice.authorizationStatus(for: .audio) == .authorized,
-            obsInstalled: FileManager.default.fileExists(atPath: "/Applications/OBS.app"),
             virtualCamera: video.contains { name in virtualCameraNames.contains { name.contains($0) } },
             virtualAudio: audio.contains { name in virtualAudioNames.contains { name.contains($0) } },
             background: background, gesture: gesture, callApp: callApp)
@@ -39,7 +37,7 @@ struct SetupChecks: Equatable {
         switch item {
         case .camera: camera
         case .mic: mic
-        case .virtualCamera: virtualCamera  // só o dispositivo conta: OBS instalado sem a extensão aprovada não basta
+        case .virtualCamera: virtualCamera  // só o dispositivo conta: extensão instalada mas não aprovada não basta
         case .virtualAudio: virtualAudio
         case .background: background
         case .gesture: gesture
