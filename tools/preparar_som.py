@@ -1,7 +1,7 @@
 # preparar_som.py — converte qualquer áudio (mp3, m4a, wav...) no WAV que o teleporte usa,
 # cortando o silêncio do começo pra o som sair junto com o gesto.
 # uso: python tools/preparar_som.py [entrada] [saída]
-import os, subprocess, sys, tempfile, wave
+import os, shutil, subprocess, sys, tempfile, wave
 import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -9,10 +9,18 @@ PRE_ROLL = 0.1   # deixa 0,1 s antes do som: casa com SOUND_LEAD do teleporte.py
 TAIL = 0.1       # e 0,1 s depois do último trecho audível
 THRESHOLD = 0.02 # o que fica abaixo de 2% do volume máximo conta como silêncio
 
+def decoder(src, dst):
+    # afconvert vem com o macOS; no Windows (e no CI), o ffmpeg
+    if shutil.which("afconvert"):
+        return ["afconvert", "-f", "WAVE", "-d", "LEI16", src, dst]
+    if shutil.which("ffmpeg"):
+        return ["ffmpeg", "-loglevel", "error", "-y", "-i", src, "-acodec", "pcm_s16le", dst]
+    sys.exit("Precisa do afconvert (macOS) ou do ffmpeg (Windows: winget install ffmpeg) para converter o som.")
+
 def prepare(src, dst):
     with tempfile.TemporaryDirectory() as tmp:
         tmp_wav = os.path.join(tmp, "som.wav")
-        subprocess.run(["afconvert", "-f", "WAVE", "-d", "LEI16", src, tmp_wav], check=True)
+        subprocess.run(decoder(src, tmp_wav), check=True)
         with wave.open(tmp_wav) as w:
             params, sr, ch = w.getparams(), w.getframerate(), w.getnchannels()
             a = np.frombuffer(w.readframes(w.getnframes()), np.int16).reshape(-1, ch)
