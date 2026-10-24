@@ -35,6 +35,14 @@ final class AppModel {
     var gain: Double {
         didSet { UserDefaults.standard.set(gain, forKey: "gain"); send("set", ["gain": gain]) }
     }
+    var fps: Int {
+        didSet {
+            UserDefaults.standard.set(fps, forKey: "fps")
+            applyFPS()
+        }
+    }
+    /// Até quanto a câmera escolhida chega na fps pedida (pode ser menos): calculado dos formatos, ligado ou não.
+    var cameraFPS: Double? { cameraID.flatMap { CameraCapture.maxFPS(deviceID: $0, wanted: Double(fps)) } }
     var reach: Double {
         didSet { UserDefaults.standard.set(reach, forKey: "reach"); send("set", ["reach": reach]) }
     }
@@ -60,6 +68,7 @@ final class AppModel {
         callAppDone = d.bool(forKey: "setup.callApp")
         gain = d.object(forKey: "gain") as? Double ?? 0.8
         reach = d.object(forKey: "reach") as? Double ?? 1.5
+        fps = d.object(forKey: "fps") as? Int ?? 30
         micName = d.string(forKey: "micName")
         preferredCameraID = d.string(forKey: "cameraID")
         refreshDevices()
@@ -121,7 +130,12 @@ final class AppModel {
     }
 
     private func switchCapture(to id: String) {
-        do { try capture?.start(deviceID: id) } catch { lastError = error.localizedDescription }
+        do { try capture?.start(deviceID: id, fps: Double(fps)) } catch { lastError = error.localizedDescription }
+    }
+
+    private func applyFPS() {
+        guard running, let cameraID else { return }
+        switchCapture(to: cameraID)  // a câmera virtual e o motor seguem a velocidade dos frames
     }
 
     /// Troca o microfone; o motor abre o microfone ao iniciar, então religa se estiver ligado.
@@ -231,7 +245,7 @@ final class AppModel {
             let shm = Self.supportDir.appendingPathComponent("frames.shm").path
             let frames = try FrameBuffer(path: shm, width: Self.width, height: Self.height)
             let capture = CameraCapture(buffer: frames)
-            try capture.start(deviceID: id)
+            try capture.start(deviceID: id, fps: Double(fps))
             started = capture
             let engine = EngineClient()
             let current = ObjectIdentifier(engine)
@@ -244,7 +258,7 @@ final class AppModel {
             try engine.start(executable: exe, arguments: args, log: Self.logURL)
             // com a câmera própria instalada, o app entrega o vídeo; senão o motor manda pro OBS
             feed = CameraFeed(frames: frames)
-            var fields: [String: Any] = ["shm": shm, "gain": gain, "reach": reach, "vcam": feed == nil]
+            var fields: [String: Any] = ["shm": shm, "gain": gain, "reach": reach, "vcam": feed == nil, "fps": fps]
             if let micName { fields["mic"] = micName }
             engine.send("start", fields)
             (self.frames, self.capture, self.engine, self.cameraFeed, cameraID) = (frames, capture, engine, feed, id)

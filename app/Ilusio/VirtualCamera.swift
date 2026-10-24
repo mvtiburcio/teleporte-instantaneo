@@ -156,7 +156,7 @@ final class CameraFeed: @unchecked Sendable {
         ]
         CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attributes, &pool)
         timer = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "ilusio.camera-feed", qos: .userInteractive))
-        timer.schedule(deadline: .now(), repeating: 1.0 / 60)  // 60 Hz pra pegar cada frame de 30 fps sem atraso
+        timer.schedule(deadline: .now(), repeating: 1.0 / 120)  // 120 Hz: pega cada frame de até 60 fps sem atraso
         timer.setEventHandler { [weak self] in self?.tick() }
         timer.resume()
     }
@@ -166,7 +166,7 @@ final class CameraFeed: @unchecked Sendable {
     }
 
     private func tick() {
-        guard let pool else { return }
+        guard let pool, frames.hasNew(.output, last: last) else { return }
         var buffer: CVPixelBuffer?
         CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &buffer)
         guard let buffer else { return }
