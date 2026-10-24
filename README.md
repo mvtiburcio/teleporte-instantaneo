@@ -254,6 +254,7 @@ O script converte para `sons/teleport.wav` e **corta o silêncio do começo**, d
 
 | Sintoma | Causa | Solução |
 |---|---|---|
+| A chamada mostra **"Abra o Ilusio"** | A Ilusio Camera está escolhida, mas o Ilusio está desligado | Abra o Ilusio e clique em **Ligar o Ilusio** no Início. |
 | A chamada mostra o **logo do OBS** com uma câmera riscada | Nada está alimentando a câmera virtual | Ligue o Ilusio (ou rode `./teleporte`). Se já estiver ligado, troque de câmera na chamada e volte. |
 | `Câmera virtual indisponível` | O OBS está aberto usando a câmera virtual | Feche o OBS (⌘Q) e tente de novo. |
 | `Webcam não encontrada` / `not authorized to capture video` | Sem permissão de câmera | Ajustes do Sistema → Privacidade e Segurança → Câmera → ative o Ilusio (ou o Terminal). |
@@ -261,8 +262,8 @@ O script converte para `sons/teleport.wav` e **corta o silêncio do começo**, d
 | Sobra um **contorno** em volta de você no efeito | Máscara apertada | Suba `GROW_PX` (41, 51…). |
 | O gesto **não é reconhecido** | Tolerância baixa, mão longe ou rosto escondido | Aumente a sensibilidade (ou `REACH`) e deixe os olhos visíveis. |
 | Imagem **borrada** na chamada | Desfoque de fundo da própria chamada | Desligue os efeitos visuais do Meet/Zoom/Teams. |
-| A chamada **não ouve** o som | Microfone errado ou supressão de ruído | Microfone **BlackHole 2ch**; desligue o cancelamento de ruído. |
-| `BlackHole não instalado` mesmo após instalar | O CoreAudio não recarregou | `sudo killall coreaudiod` ou reinicie o Mac. |
+| A chamada **não ouve** o som | Microfone errado ou supressão de ruído | Microfone **Ilusio Mic** (app) ou **BlackHole 2ch** (linha de comando); desligue o cancelamento de ruído. |
+| O **Ilusio Mic** (ou o BlackHole) não aparece depois de instalar | O CoreAudio não recarregou | `sudo killall coreaudiod` ou reinicie o Mac. |
 | `PaMacCore ... err='-50'` no Terminal | Aviso do driver ao abrir o BlackHole | Pode ignorar: o áudio passa certo (o `./teleporte` já esconde esse aviso). |
 | O app mostra "O motor parou" | Erro no motor | Ajustes → Registro do motor → **Mostrar no Finder** e abra o `engine.log`. |
 
