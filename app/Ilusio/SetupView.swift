@@ -122,7 +122,7 @@ private struct SetupRow: View {
         case .mic: permissionAction(.audio, pane: "Privacy_Microphone")
         case .virtualCamera:
             VirtualCamera.appIsInApplications
-                ? ("Ativar a câmera", { model.activateCamera() })
+                ? (model.cameraMessage == CameraActivation.approvalText ? "Abrir Ajustes" : "Ativar a câmera", { model.activateCamera() })
                 : ("Mostrar no Finder", { NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL]) })
         case .virtualAudio:
             (model.installingMic ? "Instalando…" : (VirtualMic.isInstalled ? "Atualizar o microfone" : "Instalar o microfone"),
@@ -151,8 +151,8 @@ private struct SetupRow: View {
                    "Se você negou antes, o botão abre os Ajustes do Sistema: ative o Ilusio na lista."])
         case .virtualCamera:
             if VirtualCamera.appIsInApplications {
-                steps(["Clique em **Ativar a câmera**; o macOS avisa que uma extensão foi bloqueada.",
-                       "Em Ajustes do Sistema ▸ Geral ▸ Itens de Início e Extensões ▸ **Extensões de Câmera**, ative o Ilusio.",
+                steps(["Clique em **Ativar a câmera**: os Ajustes do Sistema abrem sozinhos em Itens de Início e Extensões.",
+                       "Em **Extensões de Câmera**, ative o Ilusio (o macOS pode pedir a sua senha).",
                        "Volte aqui: este item fica verde sozinho."])
             } else {
                 steps(["O macOS só ativa a câmera de apps que estão em **Aplicativos**.",

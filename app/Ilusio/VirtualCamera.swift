@@ -1,3 +1,4 @@
+import AppKit
 import AVFoundation
 import CoreMediaIO
 import Foundation
@@ -13,6 +14,9 @@ enum VirtualCamera {
         AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified)
             .devices.contains { $0.localizedName == deviceName }
     }
+
+    /// Painel "Itens de Início e Extensões" dos Ajustes do Sistema, onde fica a aprovação de Extensões de Câmera.
+    static let approvalSettingsURL = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension")!
 
     /// O macOS só ativa system extensions de apps que estão em /Applications.
     static var appIsInApplications: Bool { Bundle.main.bundlePath.hasPrefix("/Applications/") }
@@ -44,6 +48,7 @@ final class CameraActivation: NSObject, OSSystemExtensionRequestDelegate {
     }
 
     func requestNeedsUserApproval(_ request: OSSystemExtensionRequest) {
+        NSWorkspace.shared.open(VirtualCamera.approvalSettingsURL)  // já leva a pessoa até onde aprova
         report(Self.approvalText)
     }
 
