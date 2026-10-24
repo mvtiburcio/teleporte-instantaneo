@@ -100,3 +100,17 @@ final class FrameBufferReopenTests: XCTestCase {
         XCTAssertFalse(dst.withUnsafeMutableBytes { new.read(.output, last: &last, into: $0.baseAddress!) })  // seq zerado
     }
 }
+
+final class FrameBufferStrideTests: XCTestCase {
+    func testLeParaDestinoComLinhasAlinhadas() throws {
+        let w = 64, h = 48, stride = w * 4 + 32
+        let fb = try FrameBuffer(path: NSTemporaryDirectory() + "fb-\(UUID().uuidString).shm", width: w, height: h)
+        let src = (0..<fb.slotSize).map { UInt8($0 % 251) }
+        src.withUnsafeBytes { fb.write(.output, from: $0.baseAddress!, bytesPerRow: w * 4) }
+        var dst = [UInt8](repeating: 0, count: stride * h), last: UInt64 = 0
+        XCTAssertTrue(dst.withUnsafeMutableBytes { fb.read(.output, last: &last, into: $0.baseAddress!, bytesPerRow: stride) })
+        for y in [0, h / 2, h - 1] {
+            XCTAssertEqual(dst[(y * stride)..<(y * stride + w * 4)], src[(y * w * 4)..<((y + 1) * w * 4)])
+        }
+    }
+}

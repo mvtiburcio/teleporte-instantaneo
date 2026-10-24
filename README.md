@@ -47,6 +47,7 @@ O primeiro efeito é o **Teletransporte Instantâneo**, inspirado no Goku: coloq
 |---|---|---|
 | Para quem | Qualquer pessoa | Quem programa ou tem macOS mais antigo |
 | Sistema | macOS 26+, Apple Silicon | macOS 13+ (Apple Silicon ou Intel) |
+| Câmera virtual | **Ilusio Camera**, ativada no checklist | OBS Virtual Camera |
 | Configuração | Tour + checklist guiado, tudo na tela | `./setup.sh` + configuração do OBS |
 | Atalhos | Globais (funcionam com a chamada em primeiro plano) | Teclas na janela de prévia |
 | Status | Em desenvolvimento; `.dmg` assinado em breve nas [Releases](https://github.com/mvtiburcio/teleporte-instantaneo/releases) | Pronto |
@@ -59,7 +60,7 @@ Interface em SwiftUI com o visual Liquid Glass do macOS 26.
 
 1. Permitir a câmera
 2. Permitir o microfone
-3. Câmera virtual
+3. Ativar a câmera virtual (**Ilusio Camera**, sem OBS)
 4. Som virtual
 5. Gravar o fundo
 6. Testar o gesto
@@ -130,7 +131,7 @@ O efeito dura **0,9 s** e acompanha o som:
   <img src="docs/img/arquitetura.svg" alt="Diagrama: webcam e microfone entram no motor; o vídeo sai por uma câmera virtual e o áudio por um microfone virtual, ambos indo para a chamada" width="900">
 </p>
 
-1. **Vídeo.** O motor (`teleporte.py`) procura o gesto com o **MediaPipe** (mão + rosto). Quando ele dispara, o motor recorta a sua silhueta e aplica o efeito. O resultado sai por uma **câmera virtual**, que a chamada enxerga como uma câmera normal.
+1. **Vídeo.** O motor (`teleporte.py`) procura o gesto com o **MediaPipe** (mão + rosto). Quando ele dispara, o motor recorta a sua silhueta e aplica o efeito. O resultado sai por uma **câmera virtual**, que a chamada enxerga como uma câmera normal: no app, a **Ilusio Camera** (uma extensão de câmera do macOS, aprovada uma vez no checklist); no modo terminal, a OBS Virtual Camera.
 2. **Áudio.** As chamadas **cortam** o que sai do alto-falante (cancelamento de eco), então tocar o som no Mac não basta. O motor vira o seu microfone: mistura o microfone de verdade com o som do efeito e manda tudo para um **microfone virtual** (hoje o BlackHole 2ch).
 3. **Sumir.** Enquanto você está "teleportado", a chamada recebe a **foto do fundo** gravada antes, sem sombra nem contorno.
 4. **No app.** O app captura a câmera escolhida e troca os frames com o motor por **memória compartilhada** (`ipc.py`). Os comandos e eventos vão em JSON por linha. A prévia, os atalhos e o checklist ficam no app; o efeito, no motor.
@@ -284,7 +285,7 @@ O mesmo Pix está na aba **Apoiar** do app. Também ajuda muito dar uma ⭐ no r
 
 - [x] Efeito Teletransporte Instantâneo
 - [x] App para Mac: Início, Câmera e mic, Configuração guiada, Atalhos globais, Apoiar, Ajustes e tour de primeiro acesso
-- [ ] Câmera virtual própria (**Ilusio Camera**), sem precisar do OBS
+- [x] Câmera virtual própria (**Ilusio Camera**), sem precisar do OBS
 - [ ] Microfone virtual próprio (**Ilusio Mic**), sem precisar do BlackHole
 - [ ] `.dmg` assinado e notarizado nas Releases
 - [ ] Novos efeitos com gestos. Tem uma ideia? [Abra uma issue](https://github.com/mvtiburcio/teleporte-instantaneo/issues).

@@ -28,6 +28,15 @@ targets:
         PixKey: $(PIX_KEY)
         PixName: $(PIX_NAME)
         PixCity: $(PIX_CITY)
+        NSSystemExtensionUsageDescription: A câmera do Ilusio entrega o vídeo com o efeito para a chamada.
+    entitlements:
+      path: Ilusio/Ilusio.entitlements
+      properties:
+        com.apple.developer.system-extension.install: true
+        com.apple.security.application-groups: [$(TeamIdentifierPrefix)com.mvtiburcio.ilusio]
+    dependencies:
+      - target: IlusioCamera
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mvtiburcio.ilusio
@@ -44,6 +53,27 @@ targets:
           ILUSIO_REPO_DIR: ""
     scheme:
       testTargets: [IlusioTests]
+  IlusioCamera:
+    # câmera virtual "Ilusio Camera": recebe os frames do app (sink) e entrega pra chamada (source)
+    type: system-extension
+    platform: macOS
+    sources: [IlusioCamera]
+    info:
+      path: IlusioCamera/Info.plist
+      properties:
+        CFBundleDisplayName: Ilusio Camera
+        CMIOExtension:
+          CMIOExtensionMachServiceName: $(TeamIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)
+    entitlements:
+      path: IlusioCamera/IlusioCamera.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.application-groups: [$(TeamIdentifierPrefix)com.mvtiburcio.ilusio]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mvtiburcio.ilusio.camera
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: YES
   IlusioTests:
     type: bundle.unit-test
     platform: macOS

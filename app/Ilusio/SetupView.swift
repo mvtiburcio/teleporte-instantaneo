@@ -95,11 +95,11 @@ private struct SetupRow: View {
         switch item {
         case .camera: "Para ver você e reconhecer o gesto."
         case .mic: "Para misturar a sua voz com o som do efeito."
-        case .virtualCamera: model.checks.obsInstalled ? "Falta aprovar a câmera virtual do OBS (uma vez só)." : "O OBS (grátis) entrega o vídeo do Ilusio pra chamada."
+        case .virtualCamera: model.cameraMessage ?? "A “Ilusio Camera” entrega o vídeo com o efeito pra chamada."
         case .virtualAudio: "O BlackHole (grátis) entrega a sua voz + o som do efeito pra chamada."
         case .background: "A imagem que aparece quando você some."
         case .gesture: "Dois dedos na testa até ouvir o som."
-        case .callApp: "Câmera “OBS Virtual Camera” e microfone “BlackHole 2ch”."
+        case .callApp: "Câmera “Ilusio Camera” e microfone “BlackHole 2ch”."
         }
     }
 
@@ -121,9 +121,9 @@ private struct SetupRow: View {
         case .camera: permissionAction(.video, pane: "Privacy_Camera")
         case .mic: permissionAction(.audio, pane: "Privacy_Microphone")
         case .virtualCamera:
-            model.checks.obsInstalled
-                ? ("Abrir o OBS", { NSWorkspace.shared.open(URL(fileURLWithPath: "/Applications/OBS.app")) })
-                : ("Baixar o OBS", { NSWorkspace.shared.open(URL(string: "https://obsproject.com/download")!) })
+            VirtualCamera.appIsInApplications
+                ? ("Ativar a câmera", { model.activateCamera() })
+                : ("Mostrar no Finder", { NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL]) })
         case .virtualAudio: ("Baixar o BlackHole", { NSWorkspace.shared.open(URL(string: "https://existential.audio/blackhole/")!) })
         case .background, .gesture: ("Ir para o Início", goHome)
         case .callApp: ("Já escolhi", { model.callAppDone = true })
@@ -148,14 +148,14 @@ private struct SetupRow: View {
             steps(["Clique em Permitir e confirme no aviso do macOS.",
                    "Se você negou antes, o botão abre os Ajustes do Sistema: ative o Ilusio na lista."])
         case .virtualCamera:
-            if model.checks.obsInstalled {
-                steps(["No OBS, clique em **Iniciar câmera virtual**.",
-                       "Em Ajustes do Sistema ▸ Geral ▸ Itens de Início e Extensões ▸ **Extensões de Câmera**, ative o OBS.",
-                       "Volte ao OBS, clique em **Parar câmera virtual** e feche o OBS. Este item fica verde sozinho."])
+            if VirtualCamera.appIsInApplications {
+                steps(["Clique em **Ativar a câmera**; o macOS avisa que uma extensão foi bloqueada.",
+                       "Em Ajustes do Sistema ▸ Geral ▸ Itens de Início e Extensões ▸ **Extensões de Câmera**, ative o Ilusio.",
+                       "Volte aqui: este item fica verde sozinho."])
             } else {
-                steps(["Baixe o OBS para Mac (Apple Silicon) e arraste para Aplicativos.",
-                       "Abra o OBS uma vez e pule o assistente de configuração.",
-                       "Volte aqui: o próximo passo aparece sozinho."])
+                steps(["O macOS só ativa a câmera de apps que estão em **Aplicativos**.",
+                       "Clique em **Mostrar no Finder** e arraste o Ilusio para a pasta Aplicativos.",
+                       "Abra o Ilusio de lá e volte a este item."])
             }
         case .virtualAudio:
             steps(["Baixe o **BlackHole 2ch** (o site pede um e-mail para mandar o link).",
@@ -201,19 +201,19 @@ private enum CallApp: String, CaseIterable, Identifiable {
         switch self {
         case .meet:
             ["Na chamada, clique em ⋮ ▸ **Configurações**.",
-             "Em **Vídeo**, câmera **OBS Virtual Camera** e resolução 720p.",
+             "Em **Vídeo**, câmera **Ilusio Camera** e resolução 720p.",
              "Em **Áudio**, microfone **BlackHole 2ch** e desligue o cancelamento de ruído.",
              "Em **Efeitos visuais**, deixe “Sem efeito”."]
         case .zoom:
             ["Menu zoom.us ▸ **Configurações**.",
-             "Em **Vídeo**, câmera **OBS Virtual Camera**.",
+             "Em **Vídeo**, câmera **Ilusio Camera**.",
              "Em **Áudio**, microfone **BlackHole 2ch** e supressão de ruído em **Baixa**."]
         case .teams:
             ["Foto do perfil ▸ **Configurações** ▸ **Dispositivos**.",
-             "Câmera **OBS Virtual Camera** e microfone **BlackHole 2ch**.",
+             "Câmera **Ilusio Camera** e microfone **BlackHole 2ch**.",
              "Desligue a supressão de ruído."]
         case .whatsapp:
-            ["Na chamada de vídeo, clique em ⌄ ao lado da câmera e escolha **OBS Virtual Camera**.",
+            ["Na chamada de vídeo, clique em ⌄ ao lado da câmera e escolha **Ilusio Camera**.",
              "No ⌄ do microfone, escolha **BlackHole 2ch**.",
              "Se não houver opção de microfone, escolha BlackHole 2ch como entrada em Ajustes do Sistema ▸ Som."]
         }
