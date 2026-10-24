@@ -29,7 +29,8 @@ struct SetupChecks: Equatable {
             camera: AVCaptureDevice.authorizationStatus(for: .video) == .authorized,
             mic: AVCaptureDevice.authorizationStatus(for: .audio) == .authorized,
             virtualCamera: video.contains { name in virtualCameraNames.contains { name.contains($0) } },
-            virtualAudio: audio.contains { name in virtualAudioNames.contains { name.contains($0) } },
+            // driver do Ilusio desatualizado volta a pendente, pra pessoa atualizar (pede senha)
+            virtualAudio: audio.contains { name in virtualAudioNames.contains { name.contains($0) } } && !VirtualMic.needsUpdate,
             background: background, gesture: gesture, callApp: callApp)
     }
 

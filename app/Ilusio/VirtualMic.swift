@@ -8,6 +8,19 @@ enum VirtualMic {
 
     static var bundled: URL? { Bundle.main.url(forResource: "IlusioMic", withExtension: "driver") }
 
+    static var isInstalled: Bool { FileManager.default.fileExists(atPath: installedPath) }
+
+    /// O driver instalado é de outra versão que o que veio dentro deste app (o app foi atualizado).
+    static var needsUpdate: Bool {
+        needsUpdate(installed: Bundle(path: installedPath)?.infoDictionary?["CFBundleVersion"] as? String,
+                    bundled: bundled.flatMap { Bundle(url: $0)?.infoDictionary?["CFBundleVersion"] as? String })
+    }
+
+    static func needsUpdate(installed: String?, bundled: String?) -> Bool {
+        guard let installed, let bundled else { return false }  // sem driver instalado é "instalar", não "atualizar"
+        return installed != bundled
+    }
+
     /// AppleScript que copia o driver e reinicia o áudio do Mac. Falha na cópia é erro; falha só no reinício, não.
     /// O caminho de origem entra só como string escapada e passa por `quoted form of`, então não dá pra injetar comando pelo nome da pasta.
     static func installScript(source: String) -> String {

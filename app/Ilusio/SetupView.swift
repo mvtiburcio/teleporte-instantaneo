@@ -124,7 +124,9 @@ private struct SetupRow: View {
             VirtualCamera.appIsInApplications
                 ? ("Ativar a câmera", { model.activateCamera() })
                 : ("Mostrar no Finder", { NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL]) })
-        case .virtualAudio: (model.installingMic ? "Instalando…" : "Instalar o microfone", { Task { await model.installMic() } })
+        case .virtualAudio:
+            (model.installingMic ? "Instalando…" : (VirtualMic.isInstalled ? "Atualizar o microfone" : "Instalar o microfone"),
+             { Task { await model.installMic() } })
         case .background, .gesture: ("Ir para o Início", goHome)
         case .callApp: ("Já escolhi", { model.callAppDone = true })
         }
