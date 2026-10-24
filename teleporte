@@ -1,0 +1,5 @@
+#!/bin/zsh
+# lança o teletransporte escondendo os logs internos do MediaPipe/CoreAudio (erros de verdade continuam aparecendo)
+cd "${0:A:h}"
+exec .venv/bin/python -u teleporte.py 2> >(grep --line-buffered -v -E \
+  'absl::InitializeLog|gl_context\.cc|XNNPACK|inference_feedback_manager|PaMacCore|out device of bound|failed to properly initialize|cap_ffmpeg_impl' >&2)
