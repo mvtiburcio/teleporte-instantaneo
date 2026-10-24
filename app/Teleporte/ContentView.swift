@@ -6,6 +6,7 @@ struct ContentView: View {
         case devices = "Câmera e mic"
         case setup = "Configuração"
         case shortcuts = "Atalhos"
+        case support = "Apoiar"
         case settings = "Ajustes"
         var id: Self { self }
         var icon: String {
@@ -14,6 +15,7 @@ struct ContentView: View {
             case .devices: "camera"
             case .setup: "checklist"
             case .shortcuts: "keyboard"
+            case .support: "heart"
             case .settings: "gearshape"
             }
         }
@@ -56,6 +58,7 @@ struct ContentView: View {
             case .devices: DevicesView()
             case .setup: SetupView { section = .home }
             case .shortcuts: ShortcutsView()
+            case .support: SupportView()
             case .settings: SettingsView()
             }
         }
