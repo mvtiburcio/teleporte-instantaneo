@@ -64,6 +64,8 @@ def open_mic_bridge(mic_name=None, out_names=VIRTUAL_OUTS):
     virtual = lambda d: any(n in d["name"] for n in out_names)
     mic = next((i for i, d in enumerate(devs) if d["name"] == mic_name and d["max_input_channels"] > 0), None) if mic_name else None
     if mic is None:
+        if mic_name:
+            print(f"Microfone '{mic_name}' não encontrado: usando o padrão.")
         mic = sd.default.device[0]
         if mic < 0 or virtual(devs[mic]):  # sem entrada padrão, ou entrada do sistema já na saída virtual
             mic = next((i for i, d in enumerate(devs) if d["max_input_channels"] > 0 and not virtual(d)), None)
@@ -209,7 +211,12 @@ def run_ipc():
     # modo app: frames entram e saem por memória compartilhada; comandos no stdin, eventos no stdout
     global sfx, sfx_gain
     proto, sys.stdout = sys.stdout, sys.stderr  # print() solto não pode sujar o protocolo
-    say = lambda event, **f: emit(event, out=proto, **f)
+    say_lock = threading.Lock()  # a thread do stdin também emite: sem trava, linhas JSON podem se misturar
+
+    def say(event, **f):
+        with say_lock:
+            emit(event, out=proto, **f)
+
     cmds = queue.Queue()
 
     def read_stdin():
@@ -238,6 +245,8 @@ def run_ipc():
         say("error", code="bad_shm", msg=str(e))
         return 1
     bridge = None  # guarda a referência: os fluxos de áudio vivem enquanto ela existir
+    if start.get("mic") and not any(d["name"] == start["mic"] for d in sd.query_devices()):
+        say("error", code="mic_not_found", msg=f"microfone '{start['mic']}' não encontrado: usando o padrão")
     if start.get("output", "") is not None:
         bridge = open_mic_bridge(start.get("mic"), (start["output"],) if start.get("output") else VIRTUAL_OUTS)
         if bridge is None:
@@ -259,17 +268,19 @@ def run_ipc():
                 c = cmds.get_nowait()
             except queue.Empty:
                 c = None
-            if c:
-                name = c["cmd"]
-                if name == "stop":
-                    break
-                elif name == "capture_bg": tp.capture_bg(now, float(c.get("delay_s", BG_DELAY_S)))
-                elif name == "toggle": tp.fire(now)
-                elif name == "reappear": tp.reappear()
-                elif name == "set":
+            if c and c["cmd"] == "stop":
+                break
+            try:  # campo com valor errado vira erro pro app, não derruba o motor
+                if not c: pass
+                elif c["cmd"] == "capture_bg": tp.capture_bg(now, float(c.get("delay_s", BG_DELAY_S)))
+                elif c["cmd"] == "toggle": tp.fire(now)
+                elif c["cmd"] == "reappear": tp.reappear()
+                elif c["cmd"] == "set":
                     sfx_gain = float(c.get("gain", sfx_gain))
                     tp.reach = float(c.get("reach", tp.reach))
-                elif name == "test_sound": fire_sound()
+                elif c["cmd"] == "test_sound": fire_sound()
+            except (TypeError, ValueError) as e:
+                say("error", code="bad_command", msg=f"{c['cmd']}: {e}")
             if now >= next_state:
                 say("state", hidden=tp.hidden, bg_ready=tp.bg is not None, bg_countdown=tp.bg_countdown(now),
                     gesture=tp.sign, fps=round(frames / max(now - t0, 1e-6), 1))

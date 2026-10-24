@@ -26,9 +26,10 @@ class EngineSmokeTest(unittest.TestCase):
                 self.assertIsNotNone(got, "o motor não devolveu frame no slot out")
                 np.testing.assert_array_equal(got[..., :3], frame[..., :3])  # sem fundo gravado: passa direto
                 time.sleep(0.3)  # tempo pra sair ao menos um state
-                out, _ = p.communicate('{"cmd": "stop"}\n', timeout=15)
-                events = [json.loads(l)["event"] for l in out.splitlines()]
-                self.assertIn("state", events)
+                out, _ = p.communicate('{"cmd": "set", "gain": "alto"}\n{"cmd": "stop"}\n', timeout=15)
+                events = [json.loads(l) for l in out.splitlines()]  # linha entrelaçada quebraria o json.loads
+                self.assertIn("state", [e["event"] for e in events])
+                self.assertIn("bad_command", [e.get("code") for e in events])  # campo errado não derruba o motor
                 self.assertEqual(p.returncode, 0)
             finally:
                 watchdog.cancel()

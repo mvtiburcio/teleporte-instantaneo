@@ -37,6 +37,8 @@ class FrameShm:
     def _set_seq(self, slot, v):
         struct.pack_into("<Q", self.mm, SEQ_OFF[slot], v)
 
+    # ponytail: sem barreira de memória (o Python não tem fence portátil); no ARM o leitor pode, raramente,
+    # ver o seq novo antes do último byte e mostrar um frame rasgado. O lado Swift lê o seq com acquire.
     def write(self, slot, frame):
         s = self._seq(slot) & ~1  # um escritor por slot: seq par aqui
         self._set_seq(slot, s + 1)
