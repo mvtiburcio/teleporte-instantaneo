@@ -28,7 +28,8 @@ security find-identity -v -p codesigning | grep -q "$IDENTITY" || { echo "falta 
 [ -z "$(git status --porcelain)" ] || { echo "há mudanças não commitadas: o release sai só de código versionado" >&2; exit 1; }
 rm -rf "$OUT" && mkdir -p "$OUT"
 
-# assina cada Mach-O de uma pasta (de dentro pra fora), com hardened runtime e carimbo de tempo
+# assina cada Mach-O da pasta individualmente e o executável principal por último (com os entitlements),
+# tudo com hardened runtime e carimbo de tempo
 sign_tree() {
   local dir=$1 main=$2
   find "$dir" -type f | while read -r f; do
@@ -51,7 +52,8 @@ echo "==> 3/6 app (archive + export Developer ID)"
 (cd app && xcodegen generate -q)
 xcodebuild -quiet archive -project app/Ilusio.xcodeproj -scheme Ilusio -configuration Release \
   -destination 'generic/platform=macOS' -archivePath "$OUT/Ilusio.xcarchive" \
-  -allowProvisioningUpdates MARKETING_VERSION="$VERSION"
+  -allowProvisioningUpdates MARKETING_VERSION="$VERSION" \
+  CURRENT_PROJECT_VERSION="$(git rev-list --count HEAD)"  # build crescente: sem ele o macOS não troca a câmera na atualização
 xcodebuild -quiet -exportArchive -archivePath "$OUT/Ilusio.xcarchive" -exportPath "$OUT/export" \
   -exportOptionsPlist scripts/ExportOptions.plist -allowProvisioningUpdates
 APP="$OUT/export/Ilusio.app"
@@ -79,7 +81,9 @@ shasum -a 256 "$DMG" | tee "$DMG.sha256"
 
 if [ $PUBLISH = 1 ]; then
   echo "==> 6/6 release no GitHub (rascunho)"
-  gh release create "v$VERSION" "$DMG" "$DMG.sha256" --draft --title "Ilusio $VERSION" \
+  # a tag nasce no commit compilado, não na ponta da main de quando o rascunho for publicado
+  [ -n "$(git branch -r --contains HEAD)" ] || { echo "faça push deste commit antes de publicar" >&2; exit 1; }
+  gh release create "v$VERSION" "$DMG" "$DMG.sha256" --draft --target "$(git rev-parse HEAD)" --title "Ilusio $VERSION" \
     --notes "Baixe o Ilusio-$VERSION.dmg, arraste o Ilusio para Aplicativos e abra. O app guia o resto (câmera e microfone do Ilusio, fundo, gesto). macOS 26+, Apple Silicon."
 fi
 echo "Pronto: $DMG"
