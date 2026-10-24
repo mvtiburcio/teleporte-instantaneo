@@ -76,7 +76,7 @@ Prefere o terminal? Veja <a href="#usar-pela-linha-de-comando">Usar pela linha d
 
 O app é assinado com Developer ID e notarizado pela Apple, então abre sem aviso de "desenvolvedor não identificado". Para conferir o download: `shasum -a 256 -c Ilusio-<versão>.dmg.sha256`.
 
-**Atualizar:** baixe a versão nova e substitua o Ilusio em Aplicativos.
+**Atualizar:** baixe a versão nova e substitua o Ilusio em Aplicativos. Ao abrir, o app atualiza a Ilusio Camera sozinho.
 
 **Desinstalar:** arraste o Ilusio de Aplicativos para o Lixo; o macOS remove a Ilusio Camera junto. O microfone sai com:
 
