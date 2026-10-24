@@ -1,0 +1,26 @@
+# testes do motor numa máquina Windows: o Ilusio para Windows usa o mesmo teleporte.py
+name: windows
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  motor:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Dependências
+        run: python -m pip install -r requirements.txt
+      - name: Som (ffmpeg)
+        shell: pwsh
+        run: |
+          if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) { choco install ffmpeg -y --no-progress }
+          python tools/preparar_som.py
+      - name: Testes do motor
+        run: python -m unittest discover -s tests -v

@@ -32,7 +32,9 @@ kernel = np.ones((GROW_PX, GROW_PX), np.uint8)
 # mistura microfone + som do teleporte e manda pro BlackHole, que a chamada usa como microfone
 SR = 48000   # taxa nativa do BlackHole: com outra taxa o CoreAudio dá erro -50
 BLOCK = 480  # 10 ms
-VIRTUAL_OUTS = ("Ilusio Mic", "BlackHole")  # saída virtual própria (PR 4) ou BlackHole
+# saídas virtuais onde o motor escreve: a do Ilusio (Mac), o BlackHole (Mac) ou o VB-Cable (Windows)
+VIRTUAL_OUTS = ("Ilusio Mic", "BlackHole", "CABLE Input")
+VIRTUAL_INS = VIRTUAL_OUTS + ("CABLE Output",)  # nunca usar como microfone de verdade (o VB-Cable tem dois lados)
 mic_q = queue.Queue()
 sfx, sfx_pos, sfx_gain, mic_rms = None, None, SFX_GAIN, 0.0
 
@@ -63,13 +65,13 @@ def on_audio(outdata, frames, t, status):
         outdata[:len(chunk)] += chunk * sfx_gain
         sfx_pos = sfx_pos + frames if sfx_pos + frames < len(sfx) else None
 
-def open_mic_bridge(mic_name=None, out_names=VIRTUAL_OUTS):
+def open_mic_bridge(mic_name=None, out_names=VIRTUAL_OUTS, virtual_names=VIRTUAL_INS):
     devs = sd.query_devices()
     out = next((i for n in out_names for i, d in enumerate(devs) if n in d["name"] and d["max_output_channels"] >= 2), None)
     if out is None:
         print("Saída de áudio virtual não encontrada: o som do teleporte toca só aqui, a chamada não ouve.")
         return None
-    virtual = lambda d: any(n in d["name"] for n in out_names)
+    virtual = lambda d: any(n in d["name"] for n in (*out_names, *virtual_names))
     mic = next((i for i, d in enumerate(devs) if d["name"] == mic_name and d["max_input_channels"] > 0), None) if mic_name else None
     if mic is None:
         if mic_name:
@@ -136,9 +138,17 @@ def teleport(frame, bg, m, p):
         cv2.line(out, (int(x), int(y - L // 2)), (int(x), int(y + L // 2)), c, int(rng.integers(1, 3)))
     return out
 
+def play_local(path):
+    # som pra você ouvir: afplay no Mac, winsound (stdlib) no Windows; os dois não bloqueiam
+    if sys.platform == "win32":
+        import winsound
+        winsound.PlaySound(path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+    else:
+        subprocess.Popen(["afplay", path])
+
 def fire_sound():
     global sfx_pos
-    subprocess.Popen(["afplay", SOUND])  # pra você ouvir
+    play_local(SOUND)  # pra você ouvir
     sfx_pos = 0                          # pra chamada ouvir
 
 class Teleporter:
