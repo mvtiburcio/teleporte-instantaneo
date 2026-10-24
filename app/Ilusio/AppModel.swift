@@ -210,7 +210,8 @@ final class AppModel {
             lastError = "Motor não encontrado: rode ./setup.sh no repositório."
             return
         }
-        var started: CameraCapture?  // pra desligar a câmera se o motor não subir
+        var started: CameraCapture?  // pra desligar a câmera e o feed se o motor não subir
+        var feed: CameraFeed?
         do {
             try FileManager.default.createDirectory(at: Self.supportDir, withIntermediateDirectories: true)
             let shm = Self.supportDir.appendingPathComponent("frames.shm").path
@@ -228,7 +229,7 @@ final class AppModel {
             }
             try engine.start(executable: exe, arguments: args, log: Self.logURL)
             // com a câmera própria instalada, o app entrega o vídeo; senão o motor manda pro OBS
-            let feed = CameraFeed(frames: frames)
+            feed = CameraFeed(frames: frames)
             var fields: [String: Any] = ["shm": shm, "gain": gain, "reach": reach, "vcam": feed == nil]
             if let micName { fields["mic"] = micName }
             engine.send("start", fields)
@@ -240,6 +241,7 @@ final class AppModel {
             }
         } catch {
             started?.stop()
+            feed?.stop()
             lastError = error.localizedDescription
         }
     }
