@@ -25,6 +25,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
 /// Aba "Ajustes": tema do app e ajuda pra suporte.
 struct SettingsView: View {
     @AppStorage("theme") private var theme: AppTheme = .system
+    @AppStorage(OnboardingView.doneKey) private var onboarded = false
 
     var body: some View {
         Form {
@@ -33,6 +34,11 @@ struct SettingsView: View {
                     ForEach(AppTheme.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)
+            }
+            Section("Ajuda") {
+                LabeledContent("Tour de boas-vindas") {
+                    Button("Rever o tour", systemImage: "play.rectangle") { onboarded = false }
+                }
             }
             Section {
                 LabeledContent("Registro do motor") {
