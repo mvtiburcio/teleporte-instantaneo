@@ -16,7 +16,7 @@ Levar o Ilusio para o Windows com a mesma experiência do app de Mac: baixar um 
 | Câmera virtual | **Ilusio Camera** própria: DLL C++ (media source do Media Foundation) registrada como COM e criada com `MFCreateVirtualCamera`; o app entrega os frames por um mapeamento de memória nomeado. Sem driver, sem assinatura obrigatória |
 | Microfone virtual | **VB-Cable** (gratuito, instalado à parte, guiado pelo checklist). Microfone próprio exige driver de kernel assinado pela Microsoft (certificado EV + atestação no Partner Center): fica no roadmap, condicionado ao certificado |
 | Som local | `winsound` (stdlib) no lugar do `afplay` |
-| Atalhos globais | `RegisterHotKey` da API do Windows (via `ctypes`), mesmos padrões do Mac trocando ⌃⌥ por Ctrl+Alt |
+| Atalhos globais | `RegisterHotKey` da API do Windows (via `ctypes`), padrões **Ctrl+Alt+Shift+T/L/B/R**: Ctrl+Alt sozinho é o AltGr do teclado ABNT2 (roubaria caracteres) e Ctrl+Shift+T é "reabrir aba" nos navegadores |
 | Distribuição | Instalador `Ilusio-Setup-<versão>.exe` (Inno Setup), sem assinatura: instala, registra a Ilusio Camera (UAC uma vez), cria atalho no menu Iniciar. Um `.exe` de arquivo único foi descartado: descompactaria ~250 MB a cada abertura |
 | Build | GitHub Actions `windows-latest`: testes do motor, DLL da câmera (MSVC), app (PyInstaller `--onedir`), instalador; anexado à mesma release do `.dmg` |
 | Teste real | PC com Windows do usuário |
@@ -45,10 +45,15 @@ Ilusio.exe (PySide6)
  ├─ motor: Engine(teleporte) em thread própria: gesto, efeito, mixer de áudio → VB-Cable
  ├─ prévia: QImage a ~15 fps
  └─ saída de vídeo:
-     ├─ Windows 11: mapeamento nomeado "Local\IlusioCameraFrames" (mesmo layout/seqlock do frames.shm)
-     │                → IlusioCamera.dll (dentro do Frame Server do Windows) → chamada
+     ├─ Windows 11: mapeamento nomeado "Global\IlusioCameraFrames" (mesmo layout/seqlock do frames.shm)
+     │                ← criado pela IlusioCamera.dll, que roda no Frame Server (LOCAL SERVICE, sessão 0)
+     │                → chamada
      └─ Windows 10: pyvirtualcam (OBS)
 ```
+
+**Mapeamento dos frames:** a DLL roda no Frame Server, numa sessão diferente da do app, então `Local\` não serve. Quem cria o `Global\IlusioCameraFrames` é a DLL (o serviço tem `SeCreateGlobalPrivilege`; um usuário comum não), com DACL de leitura e escrita para usuários interativos. O app só abre o mapeamento e, se a câmera ainda não existir, tenta de novo a cada segundo. Sem frames novos há mais de 0,5 s, a DLL mostra o placeholder "Abra o Ilusio".
+
+**Câmeras virtuais fora da captura:** "Ilusio Camera" e "OBS Virtual Camera" aparecem na lista do Media Foundation/DirectShow, mas nunca são oferecidas como fonte nem viram padrão (o mesmo cuidado do `Devices.virtualNames` do Mac), para o app não realimentar a própria saída.
 
 O motor ganha a classe `Engine` (start/stop/comandos/eventos por callback), reaproveitada pelo `run_ipc` do Mac, sem mudar o protocolo `--ipc`.
 
