@@ -17,8 +17,14 @@ struct SetupChecks: Equatable {
     var gesture = false
     var callApp = false
 
-    static let virtualCameraNames = ["OBS Virtual Camera", "Ilusio Camera"]
-    static let virtualAudioNames = ["BlackHole", "Ilusio Mic"]
+    // só os dispositivos do próprio Ilusio contam: com OBS/BlackHole já instalados, o checklist ficava verde e
+    // nunca oferecia ativar a Ilusio Camera nem instalar o Ilusio Mic (e no WhatsApp a OBS Virtual Camera congela)
+    static let virtualCameraNames = ["Ilusio Camera"]
+    static let virtualAudioNames = ["Ilusio Mic"]
+
+    static func hasOwn(_ deviceNames: [String], _ ownNames: [String]) -> Bool {
+        deviceNames.contains { name in ownNames.contains { name.contains($0) } }
+    }
 
     static func current(background: Bool, gesture: Bool, callApp: Bool) -> SetupChecks {
         let video = AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified)
@@ -28,9 +34,9 @@ struct SetupChecks: Equatable {
         return SetupChecks(
             camera: AVCaptureDevice.authorizationStatus(for: .video) == .authorized,
             mic: AVCaptureDevice.authorizationStatus(for: .audio) == .authorized,
-            virtualCamera: video.contains { name in virtualCameraNames.contains { name.contains($0) } },
+            virtualCamera: hasOwn(video, virtualCameraNames),
             // driver do Ilusio desatualizado volta a pendente, pra pessoa atualizar (pede senha)
-            virtualAudio: audio.contains { name in virtualAudioNames.contains { name.contains($0) } } && !VirtualMic.needsUpdate,
+            virtualAudio: hasOwn(audio, virtualAudioNames) && !VirtualMic.needsUpdate,
             background: background, gesture: gesture, callApp: callApp)
     }
 
