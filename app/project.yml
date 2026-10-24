@@ -21,6 +21,8 @@ targets:
       path: Ilusio/Info.plist
       properties:
         CFBundleDisplayName: Ilusio
+        CFBundleShortVersionString: $(MARKETING_VERSION)  # sem isto o XcodeGen grava "1.0" fixo
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.entertainment
         NSCameraUsageDescription: O Ilusio usa a câmera para reconhecer o gesto e aplicar o efeito.
         NSMicrophoneUsageDescription: O Ilusio mistura o seu microfone com o som do teletransporte para a chamada ouvir.
@@ -91,6 +93,8 @@ targets:
       path: IlusioCamera/Info.plist
       properties:
         CFBundleDisplayName: Ilusio Camera
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)  # a versão que o macOS compara pra trocar a extensão
         CMIOExtension:
           CMIOExtensionMachServiceName: $(TeamIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)
     entitlements:
