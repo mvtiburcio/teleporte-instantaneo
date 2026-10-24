@@ -204,8 +204,14 @@ final class AppModel {
             if !quiet { cameraMessage = "Mova o Ilusio para a pasta Aplicativos e abra de novo: o macOS só ativa a câmera de lá." }
             return
         }
+        // um pedido por vez: um novo substituiria o anterior e os retornos dele se perderiam
+        guard activation == nil else {
+            if !quiet { cameraMessage = "Aguardando a sua aprovação em Ajustes do Sistema." }
+            return
+        }
         let activation = CameraActivation { [weak self] text in
             if !(quiet && text == CameraActivation.doneText) { self?.cameraMessage = text }
+            if text != CameraActivation.approvalText { self?.activation = nil }  // terminou (sucesso, erro ou reinício)
             self?.refreshChecks()
         }
         self.activation = activation

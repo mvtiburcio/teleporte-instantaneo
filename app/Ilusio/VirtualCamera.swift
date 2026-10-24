@@ -21,6 +21,7 @@ enum VirtualCamera {
 /// Pede ao macOS pra instalar/atualizar a extensão; a pessoa aprova uma vez em Ajustes do Sistema.
 final class CameraActivation: NSObject, OSSystemExtensionRequestDelegate {
     static let doneText = "Câmera do Ilusio ativada."
+    static let approvalText = "Agora aprove em Ajustes do Sistema ▸ Geral ▸ Itens de Início e Extensões ▸ Extensões de Câmera."
     private let done: @MainActor (String) -> Void
 
     init(done: @escaping @MainActor (String) -> Void) {
@@ -43,7 +44,7 @@ final class CameraActivation: NSObject, OSSystemExtensionRequestDelegate {
     }
 
     func requestNeedsUserApproval(_ request: OSSystemExtensionRequest) {
-        report("Agora aprove em Ajustes do Sistema ▸ Geral ▸ Itens de Início e Extensões ▸ Extensões de Câmera.")
+        report(Self.approvalText)
     }
 
     func request(_ request: OSSystemExtensionRequest, didFinishWithResult result: OSSystemExtensionRequest.Result) {
