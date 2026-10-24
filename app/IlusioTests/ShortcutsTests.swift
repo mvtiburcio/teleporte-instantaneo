@@ -1,7 +1,7 @@
 import AppKit
 import Carbon.HIToolbox
 import XCTest
-@testable import Teleporte
+@testable import Ilusio
 
 final class ShortcutsTests: XCTestCase {
     func testDescricaoNaOrdemDoMac() {

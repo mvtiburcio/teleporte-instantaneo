@@ -32,17 +32,17 @@ struct DevicesView: View {
                             .tint(.green)
                             .frame(maxWidth: 220)
                     } else {
-                        Text("Ligue o teleporte para ver").foregroundStyle(.secondary)
+                        Text("Ligue o Ilusio para ver").foregroundStyle(.secondary)
                     }
                 }
-                LabeledContent("Som do teleporte") {
+                LabeledContent("Som do efeito") {
                     Button("Testar", systemImage: "speaker.wave.2.fill") { model.send("test_sound") }
                         .disabled(!model.running)
                 }
             } header: {
                 Text("Microfone")
             } footer: {
-                Text("O Teleporte mistura este microfone com o som do efeito. Na chamada, escolha o microfone virtual (BlackHole 2ch).")
+                Text("O Ilusio mistura este microfone com o som do efeito. Na chamada, escolha o microfone virtual (BlackHole 2ch).")
             }
 
             Section("Ajustes finos") {

@@ -7,9 +7,9 @@ import SwiftUI
 final class AppModel {
     static let width = 1280, height = 720
     static let supportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        .appendingPathComponent("Teleporte")
+        .appendingPathComponent("Ilusio")
     static let logURL = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask)[0]
-        .appendingPathComponent("Logs/Teleporte/engine.log")
+        .appendingPathComponent("Logs/Ilusio/engine.log")
 
     var running = false
     var state: EngineEvent?
@@ -105,7 +105,7 @@ final class AppModel {
         switchCapture(to: cameraID)  // caiu pra outra, ou a preferida voltou
     }
 
-    /// Escolha da pessoa: vira a preferência e, com o teleporte ligado, troca ao vivo sem reiniciar o motor.
+    /// Escolha da pessoa: vira a preferência e, com o Ilusio ligado, troca ao vivo sem reiniciar o motor.
     func selectCamera(_ id: String) {
         preferredCameraID = id
         cameraID = id

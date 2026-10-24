@@ -1,7 +1,7 @@
 import AVFoundation
 import SwiftUI
 
-/// Aba "Configuração": checklist guiado até o teleporte funcionar na chamada. Cada item se confere sozinho
+/// Aba "Configuração": checklist guiado até o efeito funcionar na chamada. Cada item se confere sozinho
 /// (menos o do app de chamada) e o primeiro pendente abre com o passo a passo e o botão que resolve.
 struct SetupView: View {
     @Environment(AppModel.self) private var model
@@ -94,9 +94,9 @@ private struct SetupRow: View {
     private var subtitle: String {
         switch item {
         case .camera: "Para ver você e reconhecer o gesto."
-        case .mic: "Para misturar a sua voz com o som do teleporte."
-        case .virtualCamera: model.checks.obsInstalled ? "Falta aprovar a câmera virtual do OBS (uma vez só)." : "O OBS (grátis) entrega o vídeo do Teleporte pra chamada."
-        case .virtualAudio: "O BlackHole (grátis) entrega a sua voz + o som do teleporte pra chamada."
+        case .mic: "Para misturar a sua voz com o som do efeito."
+        case .virtualCamera: model.checks.obsInstalled ? "Falta aprovar a câmera virtual do OBS (uma vez só)." : "O OBS (grátis) entrega o vídeo do Ilusio pra chamada."
+        case .virtualAudio: "O BlackHole (grátis) entrega a sua voz + o som do efeito pra chamada."
         case .background: "A imagem que aparece quando você some."
         case .gesture: "Dois dedos na testa até ouvir o som."
         case .callApp: "Câmera “OBS Virtual Camera” e microfone “BlackHole 2ch”."
@@ -146,7 +146,7 @@ private struct SetupRow: View {
         switch item {
         case .camera, .mic:
             steps(["Clique em Permitir e confirme no aviso do macOS.",
-                   "Se você negou antes, o botão abre os Ajustes do Sistema: ative o Teleporte na lista."])
+                   "Se você negou antes, o botão abre os Ajustes do Sistema: ative o Ilusio na lista."])
         case .virtualCamera:
             if model.checks.obsInstalled {
                 steps(["No OBS, clique em **Iniciar câmera virtual**.",
@@ -162,10 +162,10 @@ private struct SetupRow: View {
                    "Rode o instalador; ele pede a sua senha.",
                    "Se depois de instalar este item não ficar verde, reinicie o Mac."])
         case .background:
-            steps(["No Início, clique em **Ligar teleporte** e depois em **Gravar fundo**.",
+            steps(["No Início, clique em **Ligar o Ilusio** e depois em **Gravar fundo**.",
                    "Saia do quadro e da frente da luz durante a contagem de 5 segundos."])
         case .gesture:
-            steps(["Com o teleporte ligado e o fundo gravado, encoste o **indicador e o médio** na testa.",
+            steps(["Com o Ilusio ligado e o fundo gravado, encoste o **indicador e o médio** na testa.",
                    "Segure meio segundo: a borda da prévia fica verde, toca o som e você some.",
                    "Repita o gesto para voltar. Também dá pelo atalho ⌃⌥T."])
         case .callApp:

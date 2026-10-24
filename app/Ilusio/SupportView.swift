@@ -9,8 +9,8 @@ struct SupportView: View {
         ScrollView {
             HStack(alignment: .center, spacing: 36) {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Curtiu o teleporte? 💛").font(.largeTitle.bold())
-                    Text("O Teleporte é grátis e de código aberto. Se ele te fez rir numa reunião, um Pix de qualquer valor ajuda a manter o projeto.")
+                    Text("Curtiu o Ilusio? 💛").font(.largeTitle.bold())
+                    Text("O Ilusio é grátis e de código aberto. Se ele te fez rir numa reunião, um Pix de qualquer valor ajuda a manter o projeto.")
                         .font(.title3)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

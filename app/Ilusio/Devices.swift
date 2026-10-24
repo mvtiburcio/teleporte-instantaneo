@@ -1,9 +1,9 @@
 import AVFoundation
 import CoreAudio
 
-/// Câmeras e microfones reais: os virtuais (do próprio Teleporte, do OBS e do BlackHole) nunca são fonte.
+/// Câmeras e microfones reais: os virtuais (do próprio Ilusio, do OBS e do BlackHole) nunca são fonte.
 enum Devices {
-    static let virtualNames = ["OBS Virtual Camera", "Teleporte Camera", "BlackHole", "Teleporte Mic"]
+    static let virtualNames = ["OBS Virtual Camera", "Ilusio Camera", "BlackHole", "Ilusio Mic"]
 
     struct Item: Identifiable, Hashable {
         let id: String

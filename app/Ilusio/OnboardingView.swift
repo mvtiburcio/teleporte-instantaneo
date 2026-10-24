@@ -14,11 +14,11 @@ struct OnboardingView: View {
     }
 
     private let pages = [
-        Page(title: "Bem-vindo ao Teleporte",
-             text: "Suma da videochamada com um gesto, com o som e o efeito do Teletransporte Instantâneo. Este tour leva um minuto.",
+        Page(title: "Bem-vindo ao Ilusio",
+             text: "Efeitos mágicos para a sua videochamada. O primeiro é o Teletransporte Instantâneo: suma da chamada com um gesto, com som e tudo. Este tour leva um minuto.",
              symbol: "sparkles", colors: [.orange, .pink]),
         Page(title: "Como funciona",
-             text: "O Teleporte usa a sua câmera, aplica o efeito e entrega uma câmera e um microfone virtuais. Na chamada (Meet, Zoom, Teams ou WhatsApp), você escolhe esses dois no lugar dos normais.",
+             text: "O Ilusio usa a sua câmera, aplica o efeito e entrega uma câmera e um microfone virtuais. Na chamada (Meet, Zoom, Teams ou WhatsApp), você escolhe esses dois no lugar dos normais.",
              symbol: "video.badge.waveform", colors: [.blue, .purple]),
         Page(title: "O gesto",
              text: "Encoste o indicador e o médio na testa e segure meio segundo. Você some com o som do Goku; repita para voltar. Sem a mão livre? Use o atalho ⌃⌥T.",

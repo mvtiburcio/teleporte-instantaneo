@@ -24,7 +24,7 @@ kernel = np.ones((GROW_PX, GROW_PX), np.uint8)
 # mistura microfone + som do teleporte e manda pro BlackHole, que a chamada usa como microfone
 SR = 48000   # taxa nativa do BlackHole: com outra taxa o CoreAudio dá erro -50
 BLOCK = 480  # 10 ms
-VIRTUAL_OUTS = ("Teleporte Mic", "BlackHole")  # saída virtual própria (PR 4) ou BlackHole
+VIRTUAL_OUTS = ("Ilusio Mic", "BlackHole")  # saída virtual própria (PR 4) ou BlackHole
 mic_q = queue.Queue()
 sfx, sfx_pos, sfx_gain, mic_rms = None, None, SFX_GAIN, 0.0
 

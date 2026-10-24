@@ -1,5 +1,5 @@
 import XCTest
-@testable import Teleporte
+@testable import Ilusio
 
 final class FrameBufferTests: XCTestCase {
     let w = 64, h = 48

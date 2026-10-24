@@ -1,5 +1,5 @@
 import XCTest
-@testable import Teleporte
+@testable import Ilusio
 
 final class SetupTests: XCTestCase {
     func testContagem() {
