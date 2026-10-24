@@ -45,6 +45,21 @@ struct DevicesView: View {
                 Text("O Ilusio mistura este microfone com o som do efeito. Na chamada, escolha o microfone virtual “Ilusio Mic”.")
             }
 
+            Section {
+                Picker("Taxa de quadros", selection: $model.fps) {
+                    ForEach([15, 30, 60], id: \.self) { Text("\($0) fps").tag($0) }
+                }
+                .pickerStyle(.segmented)
+            } header: {
+                Text("Vídeo")
+            } footer: {
+                if let delivered = model.deliveredFPS, delivered < Double(model.fps) {
+                    Text("Esta câmera vai até \(Int(delivered)) fps; o Ilusio usa esse máximo.")
+                } else {
+                    Text("60 fps deixa o movimento mais fluido e usa mais processador. 30 fps é o padrão das chamadas.")
+                }
+            }
+
             Section("Ajustes finos") {
                 LabeledContent("Volume do efeito") {
                     Slider(value: $model.gain, in: 0...1.5) {

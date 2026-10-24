@@ -42,9 +42,10 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
             kCVPixelBufferIOSurfacePropertiesKey: [:] as NSDictionary,
         ]
         CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attributes, &pool)
-        let duration = CMTime(value: 1, timescale: Int32(frameRate))
-        let streamFormat = CMIOExtensionStreamFormat(formatDescription: format, maxFrameDuration: duration,
-                                                     minFrameDuration: duration, validFrameDurations: nil)
+        // 15 a 60 fps: a chamada escolhe; os frames do app passam na velocidade em que chegam
+        let durations = [60, 30, 15].map { CMTime(value: 1, timescale: Int32($0)) }
+        let streamFormat = CMIOExtensionStreamFormat(formatDescription: format, maxFrameDuration: durations[2],
+                                                     minFrameDuration: durations[0], validFrameDurations: durations)
         source = CameraStreamSource(localizedName: "Ilusio.Video", streamID: sourceID, direction: .source,
                                     format: streamFormat, device: self)
         sink = CameraStreamSource(localizedName: "Ilusio.Sink", streamID: sinkID, direction: .sink,
@@ -193,6 +194,7 @@ final class CameraStreamSource: NSObject, CMIOExtensionStreamSource {
 
     var formats: [CMIOExtensionStreamFormat] { [format] }
     var activeFormatIndex = 0
+    private var frameDuration = CMTime(value: 1, timescale: Int32(frameRate))
 
     var availableProperties: Set<CMIOExtensionProperty> {
         direction == .sink
@@ -204,7 +206,7 @@ final class CameraStreamSource: NSObject, CMIOExtensionStreamSource {
     func streamProperties(forProperties properties: Set<CMIOExtensionProperty>) throws -> CMIOExtensionStreamProperties {
         let props = CMIOExtensionStreamProperties(dictionary: [:])
         if properties.contains(.streamActiveFormatIndex) { props.activeFormatIndex = 0 }
-        if properties.contains(.streamFrameDuration) { props.frameDuration = CMTime(value: 1, timescale: Int32(frameRate)) }
+        if properties.contains(.streamFrameDuration) { props.frameDuration = frameDuration }
         if properties.contains(.streamSinkBufferQueueSize) { props.sinkBufferQueueSize = 1 }
         if properties.contains(.streamSinkBuffersRequiredForStartup) { props.sinkBuffersRequiredForStartup = 1 }
         return props
@@ -212,6 +214,7 @@ final class CameraStreamSource: NSObject, CMIOExtensionStreamSource {
 
     func setStreamProperties(_ streamProperties: CMIOExtensionStreamProperties) throws {
         if let index = streamProperties.activeFormatIndex { activeFormatIndex = index }
+        if let duration = streamProperties.frameDuration { frameDuration = duration }
     }
 
     func authorizedToStartStream(for client: CMIOExtensionClient) -> Bool {

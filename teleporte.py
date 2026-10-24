@@ -262,7 +262,7 @@ def run_ipc():
     vcam = None
     if start.get("vcam", True):
         try:
-            vcam = pyvirtualcam.Camera(W, H, fps=30, fmt=pyvirtualcam.PixelFormat.BGR)
+            vcam = pyvirtualcam.Camera(W, H, fps=int(start.get("fps", 30)), fmt=pyvirtualcam.PixelFormat.BGR)
         except RuntimeError as e:
             say("error", code="no_virtual_camera", msg=str(e))
     tp = Teleporter(fire_sound)

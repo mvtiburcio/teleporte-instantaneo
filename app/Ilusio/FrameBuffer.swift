@@ -57,6 +57,12 @@ final class FrameBuffer: @unchecked Sendable {
     }
 
     /// Copia o frame novo do slot para dst. Falso se não há frame novo ou se ele foi rasgado durante a cópia.
+    /// Há frame novo no slot? Barato: só olha o seq (pra não alocar buffer à toa).
+    func hasNew(_ s: Slot, last: UInt64) -> Bool {
+        let v = seq(s)
+        return v & 1 == 0 && v != last
+    }
+
     /// bytesPerRow do destino pode ser maior que width*4 (CVPixelBuffer com linhas alinhadas).
     func read(_ s: Slot, last: inout UInt64, into dst: UnsafeMutableRawPointer, bytesPerRow: Int? = nil) -> Bool {
         let v = seq(s)
