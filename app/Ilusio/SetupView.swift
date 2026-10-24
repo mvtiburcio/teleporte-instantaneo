@@ -96,10 +96,10 @@ private struct SetupRow: View {
         case .camera: "Para ver você e reconhecer o gesto."
         case .mic: "Para misturar a sua voz com o som do efeito."
         case .virtualCamera: model.cameraMessage ?? "A “Ilusio Camera” entrega o vídeo com o efeito pra chamada."
-        case .virtualAudio: "O BlackHole (grátis) entrega a sua voz + o som do efeito pra chamada."
+        case .virtualAudio: model.micMessage ?? "O “Ilusio Mic” entrega a sua voz + o som do efeito pra chamada."
         case .background: "A imagem que aparece quando você some."
         case .gesture: "Dois dedos na testa até ouvir o som."
-        case .callApp: "Câmera “Ilusio Camera” e microfone “BlackHole 2ch”."
+        case .callApp: "Câmera “Ilusio Camera” e microfone “Ilusio Mic”."
         }
     }
 
@@ -124,7 +124,7 @@ private struct SetupRow: View {
             VirtualCamera.appIsInApplications
                 ? ("Ativar a câmera", { model.activateCamera() })
                 : ("Mostrar no Finder", { NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL]) })
-        case .virtualAudio: ("Baixar o BlackHole", { NSWorkspace.shared.open(URL(string: "https://existential.audio/blackhole/")!) })
+        case .virtualAudio: (model.installingMic ? "Instalando…" : "Instalar o microfone", { Task { await model.installMic() } })
         case .background, .gesture: ("Ir para o Início", goHome)
         case .callApp: ("Já escolhi", { model.callAppDone = true })
         }
@@ -158,9 +158,9 @@ private struct SetupRow: View {
                        "Abra o Ilusio de lá e volte a este item."])
             }
         case .virtualAudio:
-            steps(["Baixe o **BlackHole 2ch** (o site pede um e-mail para mandar o link).",
-                   "Rode o instalador; ele pede a sua senha.",
-                   "Se depois de instalar este item não ficar verde, reinicie o Mac."])
+            steps(["Clique em **Instalar o microfone**; o macOS pede a sua senha de administrador (uma vez só).",
+                   "O áudio do Mac corta por uns 2 segundos enquanto reinicia.",
+                   "Se este item não ficar verde, reinicie o Mac."])
         case .background:
             steps(["No Início, clique em **Ligar o Ilusio** e depois em **Gravar fundo**.",
                    "Saia do quadro e da frente da luz durante a contagem de 5 segundos."])
@@ -202,20 +202,20 @@ private enum CallApp: String, CaseIterable, Identifiable {
         case .meet:
             ["Na chamada, clique em ⋮ ▸ **Configurações**.",
              "Em **Vídeo**, câmera **Ilusio Camera** e resolução 720p.",
-             "Em **Áudio**, microfone **BlackHole 2ch** e desligue o cancelamento de ruído.",
+             "Em **Áudio**, microfone **Ilusio Mic** e desligue o cancelamento de ruído.",
              "Em **Efeitos visuais**, deixe “Sem efeito”."]
         case .zoom:
             ["Menu zoom.us ▸ **Configurações**.",
              "Em **Vídeo**, câmera **Ilusio Camera**.",
-             "Em **Áudio**, microfone **BlackHole 2ch** e supressão de ruído em **Baixa**."]
+             "Em **Áudio**, microfone **Ilusio Mic** e supressão de ruído em **Baixa**."]
         case .teams:
             ["Foto do perfil ▸ **Configurações** ▸ **Dispositivos**.",
-             "Câmera **Ilusio Camera** e microfone **BlackHole 2ch**.",
+             "Câmera **Ilusio Camera** e microfone **Ilusio Mic**.",
              "Desligue a supressão de ruído."]
         case .whatsapp:
             ["Na chamada de vídeo, clique em ⌄ ao lado da câmera e escolha **Ilusio Camera**.",
-             "No ⌄ do microfone, escolha **BlackHole 2ch**.",
-             "Se não houver opção de microfone, escolha BlackHole 2ch como entrada em Ajustes do Sistema ▸ Som."]
+             "No ⌄ do microfone, escolha **Ilusio Mic**.",
+             "Se não houver opção de microfone, escolha Ilusio Mic como entrada em Ajustes do Sistema ▸ Som."]
         }
     }
 }

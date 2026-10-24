@@ -14,3 +14,4 @@ app/Ilusio/Info.plist
 app/Ilusio/Ilusio.entitlements
 app/IlusioCamera/Info.plist
 app/IlusioCamera/IlusioCamera.entitlements
+app/IlusioMic/build/

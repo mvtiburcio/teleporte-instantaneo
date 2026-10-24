@@ -50,6 +50,8 @@ final class AppModel {
     @ObservationIgnored private var cameraFeed: CameraFeed?
     @ObservationIgnored private var activation: CameraActivation?
     var cameraMessage: String?  // retorno da ativação da câmera do Ilusio
+    var micMessage: String?  // retorno da instalação do microfone do Ilusio
+    var installingMic = false
     @ObservationIgnored private var lastOut: UInt64 = 0
     @ObservationIgnored private var outBytes = [UInt8](repeating: 0, count: width * height * 4)
 
@@ -189,6 +191,14 @@ final class AppModel {
         }
         self.activation = activation
         activation.submit()
+    }
+
+    /// Instala o "Ilusio Mic" (pede a senha de administrador uma vez).
+    func installMic() async {
+        installingMic = true
+        micMessage = await Task.detached { VirtualMic.install() }.value
+        installingMic = false
+        refreshChecks()
     }
 
     func toggleRunning() async {
