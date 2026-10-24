@@ -1,0 +1,8 @@
+// assinatura ad-hoc por padrão; crie app/Local.xcconfig (fora do git) com a sua identidade:
+//   CODE_SIGN_IDENTITY = Apple Development: Seu Nome (XXXXXXXXXX)
+//   DEVELOPMENT_TEAM = SEUTEAMID
+// assinando com a mesma identidade, o macOS lembra as permissões de câmera e microfone entre builds
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = -
+DEVELOPMENT_TEAM =
+#include? "Local.xcconfig"

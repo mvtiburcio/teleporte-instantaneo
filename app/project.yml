@@ -1,0 +1,47 @@
+name: Teleporte
+options:
+  bundleIdPrefix: com.mvtiburcio
+  deploymentTarget:
+    macOS: "26.0"
+configFiles:
+  Debug: Base.xcconfig
+  Release: Base.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ARCHS: arm64
+targets:
+  Teleporte:
+    type: application
+    platform: macOS
+    sources: [Teleporte]
+    info:
+      path: Teleporte/Info.plist
+      properties:
+        CFBundleDisplayName: Teleporte
+        LSApplicationCategoryType: public.app-category.entertainment
+        NSCameraUsageDescription: O Teleporte usa a câmera para reconhecer o gesto e aplicar o efeito.
+        NSMicrophoneUsageDescription: O Teleporte mistura o seu microfone com o som do teletransporte para a chamada ouvir.
+        TeleporteRepoDir: $(TELEPORTE_REPO_DIR)
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mvtiburcio.teleporte
+        GENERATE_INFOPLIST_FILE: NO
+      configs:
+        Debug:
+          TELEPORTE_REPO_DIR: $(SRCROOT)/..
+        Release:
+          TELEPORTE_REPO_DIR: ""
+    scheme:
+      testTargets: [TeleporteTests]
+  TeleporteTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [TeleporteTests]
+    dependencies:
+      - target: Teleporte
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
