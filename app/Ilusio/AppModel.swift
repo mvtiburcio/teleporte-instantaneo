@@ -210,7 +210,7 @@ final class AppModel {
             if !quiet { NSWorkspace.shared.open(VirtualCamera.approvalSettingsURL) }
             return
         }
-        let activation = CameraActivation { [weak self] text in
+        let activation = CameraActivation(opensSettings: !quiet) { [weak self] text in
             if !(quiet && text == CameraActivation.doneText) { self?.cameraMessage = text }
             if text != CameraActivation.approvalText { self?.activation = nil }  // terminou (sucesso, erro ou reinício)
             self?.refreshChecks()
