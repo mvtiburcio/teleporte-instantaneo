@@ -23,19 +23,22 @@ kernel = np.ones((GROW_PX, GROW_PX), np.uint8)
 # mistura microfone + som do teleporte e manda pro BlackHole, que a chamada usa como microfone
 SR = 48000   # taxa nativa do BlackHole: com outra taxa o CoreAudio dá erro -50
 BLOCK = 480  # 10 ms
+VIRTUAL_OUTS = ("Teleporte Mic", "BlackHole")  # saída virtual própria (PR 4) ou BlackHole
 mic_q = queue.Queue()
-sfx, sfx_pos = None, None
+sfx, sfx_pos, sfx_gain, mic_rms = None, None, SFX_GAIN, 0.0
 
 def load_sfx():
     with wave.open(SOUND) as wf:
         src_sr = wf.getframerate()
         raw = np.frombuffer(wf.readframes(wf.getnframes()), np.int16).reshape(-1, wf.getnchannels())[:, :2] / 32768
     t_src, t_dst = np.arange(len(raw)) / src_sr, np.arange(int(len(raw) * SR / src_sr)) / SR
-    return np.stack([np.interp(t_dst, t_src, raw[:, c]) for c in range(raw.shape[1])], 1).astype(np.float32) * SFX_GAIN
+    return np.stack([np.interp(t_dst, t_src, raw[:, c]) for c in range(raw.shape[1])], 1).astype(np.float32)
 
 # microfone e BlackHole têm relógios diferentes: um fluxo duplex só com os dois devolve lixo (NaN),
 # então são dois fluxos ligados por uma fila curta
 def on_mic(indata, frames, t, status):
+    global mic_rms
+    mic_rms = float(np.sqrt(np.mean(indata[:, 0] ** 2)))  # pro medidor de nível do app
     mic_q.put(indata[:, 0].copy())
     while mic_q.qsize() > 5:  # não deixa o atraso crescer
         mic_q.get_nowait()
@@ -48,24 +51,27 @@ def on_audio(outdata, frames, t, status):
         outdata.fill(0)
     if sfx_pos is not None:
         chunk = sfx[sfx_pos:sfx_pos + frames]
-        outdata[:len(chunk)] += chunk
+        outdata[:len(chunk)] += chunk * sfx_gain
         sfx_pos = sfx_pos + frames if sfx_pos + frames < len(sfx) else None
 
-def open_mic_bridge():
+def open_mic_bridge(mic_name=None, out_names=VIRTUAL_OUTS):
     devs = sd.query_devices()
-    bh = next((i for i, d in enumerate(devs) if "BlackHole" in d["name"] and d["max_output_channels"] >= 2), None)
-    if bh is None:
-        print("BlackHole não instalado: o som do teleporte toca só aqui, a chamada não ouve.")
+    out = next((i for n in out_names for i, d in enumerate(devs) if n in d["name"] and d["max_output_channels"] >= 2), None)
+    if out is None:
+        print("Saída de áudio virtual não encontrada: o som do teleporte toca só aqui, a chamada não ouve.")
         return None
-    mic = sd.default.device[0]
-    if mic < 0 or "BlackHole" in devs[mic]["name"]:  # sem entrada padrão, ou entrada do sistema já no BlackHole
-        mic = next((i for i, d in enumerate(devs) if d["max_input_channels"] > 0 and "BlackHole" not in d["name"]), None)
+    virtual = lambda d: any(n in d["name"] for n in out_names)
+    mic = next((i for i, d in enumerate(devs) if d["name"] == mic_name and d["max_input_channels"] > 0), None) if mic_name else None
+    if mic is None:
+        mic = sd.default.device[0]
+        if mic < 0 or virtual(devs[mic]):  # sem entrada padrão, ou entrada do sistema já na saída virtual
+            mic = next((i for i, d in enumerate(devs) if d["max_input_channels"] > 0 and not virtual(d)), None)
     if mic is None:
         print("Nenhum microfone encontrado: a câmera funciona, mas a chamada não recebe áudio deste script.")
         return None
-    print(f"Microfone '{devs[mic]['name']}' + teleporte -> BlackHole. Na chamada, escolha o microfone 'BlackHole 2ch'.")
+    print(f"Microfone '{devs[mic]['name']}' + teleporte -> '{devs[out]['name']}'. Na chamada, escolha esse microfone.")
     streams = (sd.InputStream(device=mic, samplerate=SR, channels=1, dtype="float32", blocksize=BLOCK, callback=on_mic),
-               sd.OutputStream(device=bh, samplerate=SR, channels=2, dtype="float32", blocksize=BLOCK, callback=on_audio))
+               sd.OutputStream(device=out, samplerate=SR, channels=2, dtype="float32", blocksize=BLOCK, callback=on_audio))
     for s in streams:
         s.start()
     return streams
@@ -85,7 +91,7 @@ def open_webcam(cam):
         cap.release()
     raise SystemExit("Webcam não encontrada: libere o acesso em Ajustes > Privacidade e Segurança > Câmera.")
 
-def is_teleport_sign(hand, face):
+def is_teleport_sign(hand, face, reach=REACH):
     # indicador e médio esticados e juntos, anelar e mindinho dobrados, pontas na testa
     p = np.array([(l.x * W, l.y * H) for l in hand.landmark])
     d = lambda a, b: np.linalg.norm(p[a] - p[b])
@@ -97,7 +103,7 @@ def is_teleport_sign(hand, face):
     eye_r, eye_l = np.array([k[0].x * W, k[0].y * H]), np.array([k[1].x * W, k[1].y * H])
     eyes = np.linalg.norm(eye_r - eye_l)
     forehead = (eye_r + eye_l) / 2 - (0, eyes * 0.6)
-    return np.linalg.norm((p[8] + p[12]) / 2 - forehead) < eyes * REACH
+    return np.linalg.norm((p[8] + p[12]) / 2 - forehead) < eyes * reach
 
 def person_mask(seg, rgb):
     # máscara da pessoa, crescida e suavizada pra não sobrar contorno
@@ -119,22 +125,91 @@ def teleport(frame, bg, m, p):
         cv2.line(out, (int(x), int(y - L // 2)), (int(x), int(y + L // 2)), c, int(rng.integers(1, 3)))
     return out
 
+def fire_sound():
+    global sfx_pos
+    subprocess.Popen(["afplay", SOUND])  # pra você ouvir
+    sfx_pos = 0                          # pra chamada ouvir
+
+class Teleporter:
+    # estado do efeito (gesto, fundo, sumiço), o mesmo pro modo terminal e pro app
+    def __init__(self, on_fire):
+        self.seg = mp.solutions.selfie_segmentation.SelfieSegmentation(model_selection=1)
+        self.hands = mp.solutions.hands.Hands(max_num_hands=2, model_complexity=1, min_detection_confidence=0.5)
+        self.faces = mp.solutions.face_detection.FaceDetection(model_selection=1, min_detection_confidence=0.5)  # 1 = até ~5 m
+        self.on_fire, self.reach = on_fire, REACH
+        self.bg, self.bg_at = None, None
+        self.hidden, self.fx_start, self.target = False, None, False
+        self.sign_since, self.last_sign, self.armed = None, 0.0, True
+        self.face, self.face_at = None, 0.0
+        self.n_frame, self.sign, self.gesture_seen = 0, False, False
+
+    def capture_bg(self, now, delay=BG_DELAY_S):
+        self.bg_at = now + delay  # a sua sombra na parede também sai na foto: dá tempo de sair da luz
+
+    def bg_countdown(self, now):
+        return None if self.bg_at is None else max(0.0, self.bg_at - now)
+
+    def reappear(self):
+        self.hidden, self.fx_start = False, None
+
+    def fire(self, now):
+        if self.bg is None or self.fx_start is not None:
+            return False
+        self.on_fire()
+        self.fx_start, self.target, self.armed = now + SOUND_LEAD, not self.hidden, False
+        return True
+
+    def step(self, frame, now):
+        rgb = None  # convertido só quando algum modelo precisa, e uma vez por frame
+        self.n_frame += 1
+        if self.fx_start is not None:
+            self.sign = False
+        elif self.n_frame % 2 == 0:  # detecta a cada 2 frames: mão + rosto custam ~25 ms e travavam o vídeo
+            self.sign = False
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            fr = self.faces.process(rgb)
+            if fr.detections:
+                self.face, self.face_at = fr.detections[0], now
+            elif now - self.face_at > 1.0:
+                self.face = None  # a mão na testa às vezes esconde o rosto: usa o último visto por 1 s
+            hr = self.hands.process(rgb)
+            if hr.multi_hand_landmarks and self.face is not None:
+                self.sign = any(is_teleport_sign(h, self.face, self.reach) for h in hr.multi_hand_landmarks)
+        if self.sign:
+            self.last_sign = now
+            self.sign_since = self.sign_since or now
+        elif now - self.last_sign > 0.3:  # tolera uns frames perdidos no meio do gesto
+            self.sign_since, self.armed = None, True
+        if self.sign_since and self.armed and now - self.sign_since > HOLD_S:
+            self.gesture_seen = True
+            self.fire(now)
+
+        p = None
+        if self.fx_start is not None:
+            t = (now - self.fx_start) / FX_S
+            if t >= 1:
+                self.hidden, self.fx_start = self.target, None
+            elif t >= 0:
+                p = t if self.target else 1 - t
+
+        if p is not None:
+            rgb = rgb if rgb is not None else cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            out = teleport(frame, self.bg, person_mask(self.seg, rgb), p)
+        elif self.hidden:
+            out = self.bg
+        else:
+            out = frame
+
+        if self.bg_at is not None and now >= self.bg_at:
+            self.bg, self.hidden, self.fx_start, self.bg_at = frame.copy(), False, None, None
+        return out
+
 def main():
-    global sfx, sfx_pos
+    global sfx
     if not os.path.exists(SOUND):
         raise SystemExit("Som não encontrado: rode ./setup.sh (ou tools/preparar_som.py) antes.")
     sfx = load_sfx()
-    seg = mp.solutions.selfie_segmentation.SelfieSegmentation(model_selection=1)
-    hands = mp.solutions.hands.Hands(max_num_hands=2, model_complexity=1, min_detection_confidence=0.5)
-    faces = mp.solutions.face_detection.FaceDetection(model_selection=1, min_detection_confidence=0.5)  # 1 = até ~5 m
-
-    bg = None
-    hidden, fx_start, target = False, None, False
-    sign_since, last_sign, armed = None, 0.0, True
-    face, face_at = None, 0.0
-    n_frame, sign = 0, False
-    bg_at = None
-
+    tp = Teleporter(fire_sound)
     try:
         vcam = pyvirtualcam.Camera(W, H, fps=30, fmt=pyvirtualcam.PixelFormat.BGR)
     except RuntimeError as e:
@@ -154,64 +229,21 @@ def main():
             if frame.shape[:2] != (H, W):
                 frame = cv2.resize(frame, (W, H))
             now = time.time()
-            rgb = None  # convertido só quando algum modelo precisa, e uma vez por frame
-
-            n_frame += 1
-            if fx_start is not None:
-                sign = False
-            elif n_frame % 2 == 0:  # detecta a cada 2 frames: mão + rosto custam ~25 ms e travavam o vídeo
-                sign = False
-                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                fr = faces.process(rgb)
-                if fr.detections:
-                    face, face_at = fr.detections[0], now
-                elif now - face_at > 1.0:
-                    face = None  # a mão na testa às vezes esconde o rosto: usa o último visto por 1 s
-                hr = hands.process(rgb)
-                if hr.multi_hand_landmarks and face is not None:
-                    sign = any(is_teleport_sign(h, face) for h in hr.multi_hand_landmarks)
-            if sign:
-                last_sign = now
-                sign_since = sign_since or now
-            elif now - last_sign > 0.3:  # tolera uns frames perdidos no meio do gesto
-                sign_since, armed = None, True
-            if sign_since and armed and bg is not None and now - sign_since > HOLD_S:
-                subprocess.Popen(["afplay", SOUND])  # pra você ouvir
-                sfx_pos = 0                          # pra chamada ouvir
-                fx_start, target, armed = now + SOUND_LEAD, not hidden, False
-
-            p = None
-            if fx_start is not None:
-                t = (now - fx_start) / FX_S
-                if t >= 1:
-                    hidden, fx_start = target, None
-                elif t >= 0:
-                    p = t if target else 1 - t
-
-            if p is not None:
-                rgb = rgb if rgb is not None else cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                out = teleport(frame, bg, person_mask(seg, rgb), p)
-            elif hidden:
-                out = bg
-            else:
-                out = frame
+            out = tp.step(frame, now)
             cam.send(out)  # sem espelhar: a própria chamada espelha a sua prévia
 
             preview = cv2.flip(out, 1)
-            if bg_at is not None:
-                if now >= bg_at:
-                    bg, hidden, fx_start, bg_at = frame.copy(), False, None, None
-                else:
-                    cv2.putText(preview, f"Fundo em {bg_at - now:.0f}s: saia do quadro e da frente da luz", (30, 60),
-                                cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
-            elif bg is None:
+            if tp.bg_at is not None:
+                cv2.putText(preview, f"Fundo em {tp.bg_countdown(now):.0f}s: saia do quadro e da frente da luz", (30, 60),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 3)
+            elif tp.bg is None:
                 cv2.putText(preview, "Aperte B pra gravar o fundo", (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 3)
-            if sign:
+            if tp.sign:
                 cv2.circle(preview, (40, H - 40), 18, (0, 255, 0), -1)  # gesto reconhecido (só na prévia)
             cv2.imshow("teleporte", preview)
             k = cv2.waitKey(1) & 0xFF
-            if k == ord('b'): bg_at = now + BG_DELAY_S  # a sua sombra na parede também sai na foto: dá tempo de sair da luz
-            elif k == ord('r'): hidden, fx_start = False, None
+            if k == ord('b'): tp.capture_bg(now)
+            elif k == ord('r'): tp.reappear()
             elif k == ord('q'): break
 
 if __name__ == "__main__":
