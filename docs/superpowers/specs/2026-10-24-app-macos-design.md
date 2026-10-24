@@ -53,7 +53,7 @@ Um arquivo `frames.shm` em `~/Library/Application Support/Teleporte/`, mapeado c
 
 - Cabeçalho de 64 bytes: `magic "TLPT"`, `version u32`, `width u32`, `height u32`, `in_seq u64`, `out_seq u64`.
 - Slot `in` e slot `out`, cada um com `width*height*4` bytes (BGRA).
-- Quem escreve copia o frame no slot e só depois incrementa o `seq`. Quem lê compara o `seq`, copia e confere que o `seq` não mudou durante a cópia; se mudou, descarta o frame.
+- Seqlock por slot: quem escreve incrementa o `seq` para ímpar, copia o frame e incrementa para par. Quem lê descarta o frame se o `seq` for ímpar no início ou tiver mudado no fim da cópia. Frame novo = `seq` par diferente do último lido.
 - Leitura por polling (1 ms). `ponytail:` polling simples; trocar por semáforo POSIX se o uso de CPU aparecer no perfil.
 
 ### Protocolo stdin/stdout (JSON por linha)
@@ -90,7 +90,7 @@ O app sobe o motor ao ligar o teleporte e manda `stop` ao desligar ou sair. Se o
 
 - **Início:** prévia grande, botão "Ligar teleporte" e "Gravar fundo", status (câmera virtual, áudio, gesto). O botão "Some / Volta" faz o mesmo que o gesto.
 - **Câmera e mic:** seletor de câmera (com prévia) e de microfone (com medidor de nível), botão "Testar som", sliders de volume do efeito (`gain`) e sensibilidade do gesto (`reach`).
-- **Atalhos:** campo gravador por ação; ao clicar, captura a combinação. Padrões: `⌃⌥T` some/volta, `⌃⌥L` liga/desliga o teleporte, `⌃⌥B` grava o fundo, `⌃⌥R` reaparece. Conflito com outro atalho registrado mostra aviso. Salvos em `UserDefaults`.
+- **Atalhos:** campo gravador por ação; ao clicar, captura a combinação. Padrões: `⌃⌥T` some/volta, `⌃⌥L` liga/desliga o teleporte, `⌃⌥B` grava o fundo, `⌃⌥R` reaparece. Se o `RegisterEventHotKey` falhar, mostra aviso e mantém o atalho anterior. Salvos em `UserDefaults`.
 - **Configuração (checklist):** 7 itens, cada um se confere sozinho e tem um botão que resolve; o item atual abre com instruções.
   1. Permitir câmera — `AVCaptureDevice.authorizationStatus(for: .video)`.
   2. Permitir microfone — `authorizationStatus(for: .audio)`.
@@ -103,7 +103,7 @@ O app sobe o motor ao ligar o teleporte e manda `stop` ao desligar ou sair. Se o
 
 ## Pix estático (BR Code)
 
-Payload EMV montado no app: `00` formato "01"; `26` conta (`00` "br.gov.bcb.pix", `01` chave); `52` "0000"; `53` "986"; sem o campo `54` (valor livre); `58` "BR"; `59` nome (até 25, ASCII maiúsculo); `60` cidade (até 15); `62` (`05` txid "***"); `63` CRC16-CCITT-FALSE (poly 0x1021, init 0xFFFF) sobre tudo até `6304`, inclusive. Chave, nome e cidade vêm de build settings (`PIX_KEY`, `PIX_NAME`, `PIX_CITY`), não do código. QR gerado com `CIQRCodeGenerator` (nível M).
+Payload EMV montado no app: `00` formato "01"; `26` conta (`00` "br.gov.bcb.pix", `01` chave); `52` "0000"; `53` "986"; sem o campo `54` (valor livre); `58` "BR"; `59` nome (até 25, ASCII sem acento); `60` cidade (até 15); `62` (`05` txid "***"); `63` CRC16-CCITT-FALSE (poly 0x1021, init 0xFFFF) sobre tudo até `6304`, inclusive. Chave, nome e cidade vêm de build settings (`PIX_KEY`, `PIX_NAME`, `PIX_CITY`), não do código. QR gerado com `CIQRCodeGenerator` (nível M).
 
 ## Sequência de PRs
 
