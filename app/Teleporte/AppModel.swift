@@ -21,7 +21,8 @@ final class AppModel {
     // dispositivos e ajustes, lembrados entre aberturas do app
     var cameras: [Devices.Item] = []
     var microphones: [Devices.Item] = []
-    var cameraID: String? { didSet { UserDefaults.standard.set(cameraID, forKey: "cameraID") } }
+    var cameraID: String?  // câmera em uso: a preferida se estiver conectada, senão a do Mac
+    var preferredCameraID: String? { didSet { UserDefaults.standard.set(preferredCameraID, forKey: "cameraID") } }
     var micName: String? { didSet { UserDefaults.standard.set(micName, forKey: "micName") } }
     var gain: Double {
         didSet { UserDefaults.standard.set(gain, forKey: "gain"); send("set", ["gain": gain]) }
@@ -42,7 +43,7 @@ final class AppModel {
         gain = d.object(forKey: "gain") as? Double ?? 0.8
         reach = d.object(forKey: "reach") as? Double ?? 1.5
         micName = d.string(forKey: "micName")
-        cameraID = d.string(forKey: "cameraID")
+        preferredCameraID = d.string(forKey: "cameraID")
         refreshDevices()
         for name in [AVCaptureDevice.wasConnectedNotification, AVCaptureDevice.wasDisconnectedNotification] {
             NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
@@ -54,23 +55,28 @@ final class AppModel {
     private func refreshDevices() {
         cameras = Devices.cameras()
         microphones = Devices.microphones()
-        cameraID = Devices.pick(cameras, saved: cameraID)?.id
+        cameraID = Devices.pick(cameras, saved: preferredCameraID)?.id  // nunca sobrescreve a preferência
     }
 
     /// Câmera ou microfone conectado/desconectado (iPhone que acorda, webcam USB...).
     private func devicesChanged() {
         let using = cameraID
         refreshDevices()
-        if running, let using, cameraID != using {
-            lastError = "A câmera em uso foi desconectada; voltei para \(cameras.first { $0.id == cameraID }?.name ?? "outra câmera")."
-            if let cameraID { selectCamera(cameraID) }
+        guard running, let cameraID, cameraID != using else { return }
+        if cameraID != preferredCameraID {
+            lastError = "A câmera em uso foi desconectada; usando \(cameras.first { $0.id == cameraID }?.name ?? "outra câmera")."
         }
+        switchCapture(to: cameraID)  // caiu pra outra, ou a preferida voltou
     }
 
-    /// Troca a câmera; com o teleporte ligado, troca ao vivo sem reiniciar o motor.
+    /// Escolha da pessoa: vira a preferência e, com o teleporte ligado, troca ao vivo sem reiniciar o motor.
     func selectCamera(_ id: String) {
+        preferredCameraID = id
         cameraID = id
-        guard running else { return }
+        if running { switchCapture(to: id) }
+    }
+
+    private func switchCapture(to id: String) {
         do { try capture?.start(deviceID: id) } catch { lastError = error.localizedDescription }
     }
 

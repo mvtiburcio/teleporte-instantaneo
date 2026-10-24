@@ -22,6 +22,9 @@ struct DevicesView: View {
                                                        set: { name in Task { await model.selectMic(name.isEmpty ? nil : name) } })) {
                     Text("Padrão do sistema").tag("")
                     ForEach(model.microphones) { Text($0.name).tag($0.name) }
+                    if let saved = model.micName, !model.microphones.contains(where: { $0.name == saved }) {
+                        Text("\(saved) (desconectado)").tag(saved)  // o motor usa o padrão até ele voltar
+                    }
                 }
                 LabeledContent("Nível") {
                     if model.running {
