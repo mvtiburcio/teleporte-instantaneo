@@ -88,7 +88,7 @@ class MainWindow(QMainWindow):
         self.check_timer = QTimer(self)
         self.check_timer.timeout.connect(self.refresh_checks)
         self.check_timer.start(2000)
-        self.refresh_checks()
+        self.refresh_checks(force=True)
 
         # atalhos globais
         self.hotkeys = hotkeys.HotkeyManager(self._hotkey)
@@ -123,9 +123,11 @@ class MainWindow(QMainWindow):
 
     def _mark(self, item):
         self.settings.setValue(f"setup/{item}", True)
-        self.refresh_checks()
+        self.refresh_checks(force=True)
 
-    def refresh_checks(self):
+    def refresh_checks(self, force=False):
+        if not force and not self.isActiveWindow():  # enumerar câmeras trava a UI: não durante a chamada
+            return
         flag = lambda item: self.settings.value(f"setup/{item}", False, type=bool)
         checks = Checks.current(flag("background"), flag("gesture"), flag("call_app"))
         self.setup.refresh(checks)

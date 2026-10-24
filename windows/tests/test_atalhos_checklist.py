@@ -32,6 +32,30 @@ class HotkeysTest(unittest.TestCase):
         self.assertEqual(hotkeys.conflict("power", combos["toggle"], combos), "toggle")
         self.assertIsNone(hotkeys.conflict("toggle", combos["toggle"], combos))
 
+    def test_so_aceita_letra_digito_espaco_e_f(self):
+        from PySide6.QtCore import QEvent, Qt
+        from PySide6.QtGui import QKeyEvent
+        mods = Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.AltModifier
+        key = lambda k: hotkeys.from_key_event(QKeyEvent(QEvent.Type.KeyPress, k, mods))
+        self.assertEqual(key(Qt.Key.Key_K), hotkeys.Combo(hotkeys.CTRL | hotkeys.ALT, ord("K")))
+        self.assertEqual(str(key(Qt.Key.Key_F5)), "Ctrl+Alt+F5")
+        self.assertIsNone(key(Qt.Key.Key_Left))
+
+    def test_perder_o_foco_encerra_a_gravacao(self):
+        from PySide6.QtCore import Qt
+        from PySide6.QtGui import QFocusEvent
+        from PySide6.QtWidgets import QApplication
+        from ilusio_win.pages import KeyButton
+        app = QApplication.instance() or QApplication([])
+        b = KeyButton(hotkeys.DEFAULTS["toggle"])
+        estados = []
+        b.recording.connect(estados.append)
+        b.start()
+        b.focusOutEvent(QFocusEvent(QFocusEvent.Type.FocusOut, Qt.FocusReason.MouseFocusReason))
+        self.assertFalse(b.active)
+        self.assertEqual(estados, [True, False])
+        self.assertEqual(b.text(), "Ctrl+Alt+Shift+T")
+
     def test_texto_salvo_volta_igual(self):
         c = hotkeys.Combo(hotkeys.CTRL | hotkeys.ALT, ord("K"))
         self.assertEqual(hotkeys.Combo.parse(c.dump()), c)

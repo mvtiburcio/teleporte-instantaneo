@@ -147,6 +147,11 @@ class KeyButton(QPushButton):
         if combo:
             self.recorded.emit(combo)
 
+    def focusOutEvent(self, event):  # saiu sem gravar: devolve os atalhos globais
+        if self.active:
+            self.stop()
+        super().focusOutEvent(event)
+
 
 class ShortcutsPage(QWidget):
     changed = Signal(str, object)  # ação, Combo

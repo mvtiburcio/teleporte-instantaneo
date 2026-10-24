@@ -56,11 +56,11 @@ def from_key_event(event):
     key = event.key()
     if key in (Qt.Key.Key_Control, Qt.Key.Key_Alt, Qt.Key.Key_Shift, Qt.Key.Key_Meta) or not allowed(mods):
         return None
-    if sys.platform == "win32" and event.nativeVirtualKey():
-        return Combo(mods, event.nativeVirtualKey())
-    if Qt.Key.Key_F1 <= key <= Qt.Key.Key_F12:
-        return Combo(mods, 0x70 + key - Qt.Key.Key_F1)
-    return Combo(mods, key) if 0x20 <= key <= 0x5A else None
+    vk = event.nativeVirtualKey() if sys.platform == "win32" else 0
+    if not vk:
+        vk = 0x70 + key - Qt.Key.Key_F1 if Qt.Key.Key_F1 <= key <= Qt.Key.Key_F12 else key
+    # só espaço, 0–9, A–Z e F1–F12: o texto do atalho (__str__) é sempre legível
+    return Combo(mods, vk) if vk == 0x20 or 0x30 <= vk <= 0x39 or 0x41 <= vk <= 0x5A or 0x70 <= vk <= 0x7B else None
 
 
 class HotkeyManager(QAbstractNativeEventFilter):
