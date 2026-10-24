@@ -48,6 +48,17 @@ targets:
           rm -rf "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/IlusioMic.driver"
           ditto "$driver" "$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/IlusioMic.driver"
         basedOnDependencyAnalysis: false
+      - name: Embutir o motor (Release)
+        # Release leva o motor congelado (tools/congelar_motor.sh); Debug usa o .venv do repositório
+        script: |
+          set -e
+          [ "$CONFIGURATION" = Release ] || exit 0
+          engine="$SRCROOT/../build/engine/dist/ilusio-engine"
+          [ -x "$engine/ilusio-engine" ] || { echo "error: motor não congelado: rode tools/congelar_motor.sh"; exit 1; }
+          dest="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/engine"
+          rm -rf "$dest" && mkdir -p "$dest"
+          ditto "$engine" "$dest"
+        basedOnDependencyAnalysis: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mvtiburcio.ilusio

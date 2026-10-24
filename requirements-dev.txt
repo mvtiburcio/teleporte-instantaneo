@@ -1,0 +1,2 @@
+# só para gerar o app (tools/congelar_motor.sh); o motor em si usa requirements.txt
+pyinstaller==6.22.2
