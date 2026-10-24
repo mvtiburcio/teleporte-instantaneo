@@ -1,0 +1,52 @@
+import AVFoundation
+
+/// Itens do checklist da Configuração, na ordem em que a pessoa resolve.
+enum SetupItem: Int, CaseIterable, Identifiable {
+    case camera, mic, virtualCamera, virtualAudio, background, gesture, callApp
+    var id: Self { self }
+}
+
+/// O que já está pronto. Os itens de sistema se conferem sozinhos; fundo e gesto vêm do motor e ficam guardados;
+/// o app de chamada é marcado à mão.
+struct SetupChecks: Equatable {
+    var camera = false
+    var mic = false
+    var obsInstalled = false
+    var virtualCamera = false
+    var virtualAudio = false
+    var background = false
+    var gesture = false
+    var callApp = false
+
+    static let virtualCameraNames = ["OBS Virtual Camera", "Teleporte Camera"]
+    static let virtualAudioNames = ["BlackHole", "Teleporte Mic"]
+
+    static func current(background: Bool, gesture: Bool, callApp: Bool) -> SetupChecks {
+        let video = AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified)
+            .devices.map(\.localizedName)
+        let audio = AVCaptureDevice.DiscoverySession(deviceTypes: [.microphone, .external], mediaType: .audio, position: .unspecified)
+            .devices.map(\.localizedName)
+        return SetupChecks(
+            camera: AVCaptureDevice.authorizationStatus(for: .video) == .authorized,
+            mic: AVCaptureDevice.authorizationStatus(for: .audio) == .authorized,
+            obsInstalled: FileManager.default.fileExists(atPath: "/Applications/OBS.app"),
+            virtualCamera: video.contains { name in virtualCameraNames.contains { name.contains($0) } },
+            virtualAudio: audio.contains { name in virtualAudioNames.contains { name.contains($0) } },
+            background: background, gesture: gesture, callApp: callApp)
+    }
+
+    func isDone(_ item: SetupItem) -> Bool {
+        switch item {
+        case .camera: camera
+        case .mic: mic
+        case .virtualCamera: virtualCamera  // só o dispositivo conta: OBS instalado sem a extensão aprovada não basta
+        case .virtualAudio: virtualAudio
+        case .background: background
+        case .gesture: gesture
+        case .callApp: callApp
+        }
+    }
+
+    var doneCount: Int { SetupItem.allCases.filter(isDone).count }
+    var firstPending: SetupItem? { SetupItem.allCases.first { !isDone($0) } }
+}

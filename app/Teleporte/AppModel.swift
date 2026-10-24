@@ -18,6 +18,14 @@ final class AppModel {
     var bgSaved = false  // confirmação "fundo gravado" por alguns segundos
     var micLevel = 0.0
 
+    // checklist da Configuração; fundo, gesto e app de chamada ficam guardados depois da primeira vez
+    var checks = SetupChecks()
+    var callAppDone: Bool {
+        didSet { UserDefaults.standard.set(callAppDone, forKey: "setup.callApp"); refreshChecks() }
+    }
+    @ObservationIgnored private var backgroundDone = UserDefaults.standard.bool(forKey: "setup.bg")
+    @ObservationIgnored private var gestureDone = UserDefaults.standard.bool(forKey: "setup.gesture")
+
     // dispositivos e ajustes, lembrados entre aberturas do app
     var cameras: [Devices.Item] = []
     var microphones: [Devices.Item] = []
@@ -44,6 +52,7 @@ final class AppModel {
 
     init() {
         let d = UserDefaults.standard
+        callAppDone = d.bool(forKey: "setup.callApp")
         gain = d.object(forKey: "gain") as? Double ?? 0.8
         reach = d.object(forKey: "reach") as? Double ?? 1.5
         micName = d.string(forKey: "micName")
@@ -54,11 +63,29 @@ final class AppModel {
             shortcuts[action] = saved ?? action.defaultCombo
             registerShortcut(action)
         }
+        refreshChecks()
+        Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in  // permissão dada em Ajustes, OBS instalado...
+            MainActor.assumeIsolated { self?.refreshChecks() }
+        }
+        NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.refreshChecks() }
+        }
         for name in [AVCaptureDevice.wasConnectedNotification, AVCaptureDevice.wasDisconnectedNotification] {
             NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated { self?.devicesChanged() }
             }
         }
+    }
+
+    func refreshChecks() {
+        let now = SetupChecks.current(background: backgroundDone, gesture: gestureDone, callApp: callAppDone)
+        if now != checks { checks = now }
+    }
+
+    private func markDone(_ key: String) {
+        UserDefaults.standard.set(true, forKey: key)
+        if key == "setup.bg" { backgroundDone = true } else { gestureDone = true }
+        refreshChecks()
     }
 
     private func refreshDevices() {
@@ -217,8 +244,10 @@ final class AppModel {
         switch ev.event {
         case "state":
             if ev.bgReady == true, state?.bgCountdown != nil { flashBgSaved() }  // a contagem acabou de gravar o fundo
+            if ev.bgReady == true, !backgroundDone { markDone("setup.bg") }
             state = ev
         case "mic_level": micLevel = ev.rms ?? 0
+        case "gesture_seen": if !gestureDone { markDone("setup.gesture") }
         case "error": lastError = ev.msg ?? ev.code
         default: break
         }
