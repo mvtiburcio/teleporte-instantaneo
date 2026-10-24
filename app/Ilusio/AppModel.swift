@@ -64,6 +64,8 @@ final class AppModel {
     @ObservationIgnored private var frames: FrameBuffer?
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var cameraFeed: CameraFeed?
+    // sem isto, o App Nap freia o envio de frames quando a chamada (WhatsApp) cobre a janela: o vídeo trava
+    @ObservationIgnored private var activity: NSObjectProtocol?
     @ObservationIgnored private var activation: CameraActivation?
     var cameraMessage: String?  // retorno da ativação da câmera do Ilusio
     var micMessage: String?  // retorno da instalação do microfone do Ilusio
@@ -295,6 +297,8 @@ final class AppModel {
             if micAsSystem { SystemAudio.takeDefaultInput() }  // WhatsApp: "Usar a configuração do sistema"
             (self.frames, self.capture, self.engine, self.cameraFeed, cameraID) = (frames, capture, engine, feed, id)
             running = true
+            activity = activity ?? ProcessInfo.processInfo.beginActivity(options: [.userInitiated, .latencyCritical],
+                                                                         reason: "Ilusio ligado: entregando vídeo à chamada")
             lastOut = 0
             timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 15, repeats: true) { [weak self] _ in
                 MainActor.assumeIsolated { self?.refreshPreview() }
@@ -313,6 +317,8 @@ final class AppModel {
         capture?.stop()
         cameraFeed?.stop()
         (timer, engine, capture, frames, cameraFeed) = (nil, nil, nil, nil, nil)
+        if let activity { ProcessInfo.processInfo.endActivity(activity) }
+        activity = nil
         running = false
         micLevel = 0
         state = nil
