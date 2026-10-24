@@ -96,6 +96,9 @@ class EngineWorker(QObject):
             cap.release()
             if vcam:
                 vcam.close()
+            for stream in bridge or ():  # microfone e saída virtual: sem isso ficam abertos até o GC
+                stream.stop()
+                stream.close()
 
     @staticmethod
     def _open_vcam(fps):

@@ -46,5 +46,25 @@ class WindowTest(unittest.TestCase):
         w.close()
 
 
+class CameraSwitchTest(unittest.TestCase):
+    def test_trocar_de_camera_ligado_religa_com_a_nova(self):
+        from PySide6.QtWidgets import QApplication
+        from ilusio_win.app import MainWindow
+        from ilusio_win.devices import Camera
+        app = QApplication.instance() or QApplication([])
+        w = MainWindow(cameras=[Camera(0, "Integrated Camera"), Camera(1, "USB Webcam")])
+        started = []
+        w.worker.start = lambda index, fps=30: started.append(index)  # worker falso: sem câmera de verdade
+        cls, original = type(w.worker), type(w.worker).running
+        cls.running = property(lambda self: True)
+        try:
+            w.worker.stop = lambda: w._on_stopped()  # parar termina na hora
+            w.home.camera.setCurrentIndex(1)
+            self.assertEqual(started, [1])
+        finally:
+            cls.running = original  # devolve a propriedade de verdade pros outros testes
+            w.close()
+
+
 if __name__ == "__main__":
     unittest.main()

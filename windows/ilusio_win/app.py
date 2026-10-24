@@ -43,7 +43,8 @@ class MainWindow(QMainWindow):
         self.worker.frame.connect(self.home.preview.set_frame)
         self.worker.state.connect(self._on_state)
         self.worker.failed.connect(self.home.error.setText)
-        self.worker.stopped.connect(lambda: self.home.set_running(False))
+        self.worker.stopped.connect(self._on_stopped)
+        self._restart = False  # trocou de câmera ligado: religa quando o motor terminar de parar
         self.home.power_clicked.connect(self._toggle_power)
         self.home.background_clicked.connect(lambda: self.worker.send("capture_bg"))
         self.home.toggle_clicked.connect(lambda: self.worker.send("toggle"))
@@ -60,15 +61,25 @@ class MainWindow(QMainWindow):
         if self.worker.running:
             self.worker.stop()
             return
+        self._start()
+
+    def _start(self):
         self.home.error.setText("")
         camera = self.cameras[self.home.camera.currentIndex()]
         self.worker.start(camera.index, fps=int(self.settings.value("fps", 30)))
         self.home.set_running(True)
 
+    def _on_stopped(self):
+        self.home.set_running(False)
+        if self._restart:
+            self._restart = False
+            self._start()
+
     def _camera_changed(self, i):
         if 0 <= i < len(self.cameras):
             self.settings.setValue("camera", self.cameras[i].name)
-            if self.worker.running:  # troca religando a captura (a escolha já ficou salva)
+            if self.worker.running:  # troca ao vivo: para e religa com a câmera nova
+                self._restart = True
                 self.worker.stop()
 
     def _on_state(self, state):
