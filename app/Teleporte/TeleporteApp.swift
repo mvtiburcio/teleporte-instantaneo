@@ -15,6 +15,7 @@ struct TeleporteApp: App {
                 .environment(model)
                 .onAppear { delegate.model = model }
         }
+        .defaultSize(width: 1040, height: 720)
     }
 }
 

@@ -3,10 +3,12 @@ import SwiftUI
 struct ContentView: View {
     enum Section: String, CaseIterable, Identifiable {
         case home = "Início"
+        case devices = "Câmera e mic"
         var id: Self { self }
         var icon: String {
             switch self {
             case .home: "play.circle"
+            case .devices: "camera"
             }
         }
     }
@@ -22,8 +24,9 @@ struct ContentView: View {
         } detail: {
             switch section ?? .home {
             case .home: HomeView()
+            case .devices: DevicesView()
             }
         }
-        .frame(minWidth: 820, minHeight: 560)
+        .frame(minWidth: 900, minHeight: 620)
     }
 }
