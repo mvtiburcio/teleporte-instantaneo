@@ -7,7 +7,7 @@ sons/teleport.wav
 .env
 .env.*
 !.env.example
-app/Ilusio.xcodeproj/
+app/*.xcodeproj/
 app/Local.xcconfig
 app/build/
 app/Ilusio/Info.plist
