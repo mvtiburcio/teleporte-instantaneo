@@ -15,7 +15,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Ilusio")
         self.resize(1040, 700)
         self.setMinimumSize(900, 620)
-        self.settings = QSettings("Ilusio", "Ilusio")
+        self.settings = QSettings(QSettings.defaultFormat(), QSettings.Scope.UserScope, "Ilusio", "Ilusio")
         self.cameras = list_cameras() if cameras is None else cameras
         default = pick_default(self.cameras, self.settings.value("camera"))
 

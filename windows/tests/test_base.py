@@ -8,6 +8,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(HERE)))   # raiz (teleporte.p
 from ilusio_win.devices import Camera, pick_default, real_cameras
 from ilusio_win import theme
 
+import tempfile
+from PySide6.QtCore import QSettings
+# preferências dos testes numa pasta temporária: sem isso, um teste grava a câmera escolhida nas preferências
+# reais do usuário e o próximo começa de um estado diferente
+QSettings.setDefaultFormat(QSettings.Format.IniFormat)
+QSettings.setPath(QSettings.Format.IniFormat, QSettings.Scope.UserScope, tempfile.mkdtemp(prefix="ilusio-testes-"))
+
 
 class DevicesTest(unittest.TestCase):
     cams = [Camera(0, "OBS Virtual Camera"), Camera(1, "USB Webcam"), Camera(2, "Integrated Camera"), Camera(3, "Ilusio Camera")]
