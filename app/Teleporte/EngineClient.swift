@@ -57,7 +57,11 @@ final class EngineClient: @unchecked Sendable {
         process.standardError = logHandle
         output.fileHandleForReading.readabilityHandler = { [weak self] handle in
             let data = handle.availableData
-            guard let self, !data.isEmpty else { return }
+            guard !data.isEmpty else {
+                handle.readabilityHandler = nil  // EOF: o motor saiu; sem isso o handler roda em laço
+                return
+            }
+            guard let self else { return }
             pending.append(data)
             while let nl = pending.firstIndex(of: 0x0A) {
                 let line = String(decoding: pending[pending.startIndex..<nl], as: UTF8.self)

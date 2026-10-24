@@ -19,7 +19,8 @@ final class FrameBuffer: @unchecked Sendable {
         self.height = height
         slotSize = width * height * 4
         total = Self.headerSize + 2 * slotSize
-        let fd = open(path, O_RDWR | O_CREAT | O_TRUNC, 0o600)
+        // sem O_TRUNC: encolher um arquivo ainda mapeado (captura ou motor antigos) dá SIGBUS em quem escreve nele
+        let fd = open(path, O_RDWR | O_CREAT, 0o600)
         guard fd >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
         defer { close(fd) }
         guard ftruncate(fd, off_t(total)) == 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
@@ -29,7 +30,9 @@ final class FrameBuffer: @unchecked Sendable {
         base.copyMemory(from: Array("TLPT".utf8), byteCount: 4)
         for (offset, value) in [(4, 1), (8, width), (12, height)] {
             base.storeBytes(of: UInt32(value).littleEndian, toByteOffset: offset, as: UInt32.self)
-        }  // os seqs já nascem zerados pelo O_TRUNC + ftruncate
+        }
+        setSeq(.input, 0)
+        setSeq(.output, 0)
     }
 
     deinit { munmap(base, total) }

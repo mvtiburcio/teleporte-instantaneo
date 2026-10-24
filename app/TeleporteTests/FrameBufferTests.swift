@@ -87,3 +87,16 @@ final class PreviewImageTests: XCTestCase {
         XCTAssertEqual([px[4], px[5], px[6]], [255, 0, 0])  // vermelho
     }
 }
+
+final class FrameBufferReopenTests: XCTestCase {
+    func testReabrirNaoEncolheOArquivoEZeraOsSeqs() throws {
+        let path = NSTemporaryDirectory() + "fb-\(UUID().uuidString).shm"
+        let old = try FrameBuffer(path: path, width: 64, height: 48)
+        let src = [UInt8](repeating: 7, count: old.slotSize)
+        src.withUnsafeBytes { old.write(.output, from: $0.baseAddress!, bytesPerRow: 64 * 4) }
+        let new = try FrameBuffer(path: path, width: 64, height: 48)  // religar com a captura antiga ainda viva
+        src.withUnsafeBytes { old.write(.input, from: $0.baseAddress!, bytesPerRow: 64 * 4) }  // sem SIGBUS
+        var dst = [UInt8](repeating: 0, count: new.slotSize), last: UInt64 = 0
+        XCTAssertFalse(dst.withUnsafeMutableBytes { new.read(.output, last: &last, into: $0.baseAddress!) })  // seq zerado
+    }
+}

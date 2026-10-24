@@ -43,12 +43,14 @@ final class AppModel {
             lastError = "Motor não encontrado: rode ./setup.sh no repositório."
             return
         }
+        var started: CameraCapture?  // pra desligar a câmera se o motor não subir
         do {
             try FileManager.default.createDirectory(at: Self.supportDir, withIntermediateDirectories: true)
             let shm = Self.supportDir.appendingPathComponent("frames.shm").path
             let frames = try FrameBuffer(path: shm, width: Self.width, height: Self.height)
             let capture = CameraCapture(buffer: frames)
             try capture.start(deviceID: id)
+            started = capture
             let engine = EngineClient()
             let current = ObjectIdentifier(engine)
             engine.onEvent = { [weak self] in self?.handle($0) }
@@ -66,7 +68,7 @@ final class AppModel {
                 MainActor.assumeIsolated { self?.refreshPreview() }
             }
         } catch {
-            capture?.stop()
+            started?.stop()
             lastError = error.localizedDescription
         }
     }
