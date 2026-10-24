@@ -34,9 +34,10 @@ struct HomeView: View {
     }
 
     private var bgLabel: String {
-        if let c = model.state?.bgCountdown { return "Fundo em \(Int(c.rounded(.up))) s" }
-        return (model.state?.bgReady ?? false) ? "Regravar fundo" : "Gravar fundo"
+        (model.state?.bgReady ?? false) ? "Regravar fundo" : "Gravar fundo"
     }
+
+    private var countdown: Int? { model.state?.bgCountdown.map { Int($0.rounded(.up)) } }
 
     private var preview: some View {
         ZStack {
@@ -53,6 +54,37 @@ struct HomeView: View {
         .aspectRatio(16 / 9, contentMode: .fit)
         .clipShape(.rect(cornerRadius: 22))
         .glassEffect(.regular, in: .rect(cornerRadius: 22))
+        .overlay { backgroundGuide }
+        .animation(.smooth, value: countdown)
+        .animation(.smooth, value: model.bgSaved)
+    }
+
+    /// Instrução da gravação do fundo em cima da prévia: legível de longe, porque a pessoa está saindo do quadro.
+    @ViewBuilder private var backgroundGuide: some View {
+        if let c = countdown {
+            VStack(spacing: 8) {
+                Text("\(c)")
+                    .font(.system(size: 96, weight: .bold, design: .rounded))
+                    .contentTransition(.numericText(countsDown: true))
+                Text("Saia do quadro").font(.title.bold())
+                Text("e da frente da luz, pra sua sombra não ficar no fundo")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+            }
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 40)
+            .padding(.vertical, 28)
+            .glassEffect(.regular, in: .rect(cornerRadius: 32))
+            .transition(.scale(scale: 0.9).combined(with: .opacity))
+        } else if model.bgSaved {
+            Label("Fundo gravado. Pode voltar!", systemImage: "checkmark.circle.fill")
+                .font(.title2.bold())
+                .symbolRenderingMode(.multicolor)
+                .padding(.horizontal, 28)
+                .padding(.vertical, 16)
+                .glassEffect(.regular, in: .capsule)
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
+        }
     }
 
     private var status: some View {

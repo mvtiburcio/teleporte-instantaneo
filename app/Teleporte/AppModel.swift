@@ -16,6 +16,7 @@ final class AppModel {
     var preview: CGImage?
     var lastError: String?
     var cameraID: String?
+    var bgSaved = false  // confirmação "fundo gravado" por alguns segundos
 
     @ObservationIgnored private var engine: EngineClient?
     @ObservationIgnored private var capture: CameraCapture?
@@ -86,9 +87,19 @@ final class AppModel {
 
     private func handle(_ ev: EngineEvent) {
         switch ev.event {
-        case "state": state = ev
+        case "state":
+            if ev.bgReady == true, state?.bgCountdown != nil { flashBgSaved() }  // a contagem acabou de gravar o fundo
+            state = ev
         case "error": lastError = ev.msg ?? ev.code
         default: break
+        }
+    }
+
+    private func flashBgSaved() {
+        bgSaved = true
+        Task {
+            try? await Task.sleep(for: .seconds(2.5))
+            bgSaved = false
         }
     }
 
