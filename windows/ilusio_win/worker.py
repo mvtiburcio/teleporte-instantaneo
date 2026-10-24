@@ -91,7 +91,8 @@ class EngineWorker(QObject):
                     self.state.emit({"hidden": engine.hidden, "bg_ready": engine.bg is not None,
                                      "bg_countdown": engine.bg_countdown(now), "gesture": engine.sign,
                                      "fps": frames / max(now - t0, 1e-6), "vcam": vcam is not None,
-                                     "audio": bridge is not None, "rms": tp.mic_rms})
+                                     "audio": bridge is not None, "rms": tp.mic_rms,
+                                     "gesture_seen": engine.gesture_seen})
                     next_state, t0, frames = now + 0.2, now, 0
         finally:
             cap.release()

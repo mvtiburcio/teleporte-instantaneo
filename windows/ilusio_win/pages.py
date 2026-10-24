@@ -4,7 +4,7 @@ from PySide6.QtGui import QGuiApplication, QPixmap
 from PySide6.QtWidgets import (QComboBox, QFormLayout, QHBoxLayout, QLabel, QProgressBar, QPushButton, QSlider,
                                QVBoxLayout, QWidget)
 
-from . import __version__, pix
+from . import __version__, hotkeys, pix
 from .worker import to_qimage
 
 
@@ -113,8 +113,83 @@ class SupportPage(QWidget):
         self.copy.setText("Copiado! Obrigado 💛")
 
 
+class KeyButton(QPushButton):
+    """Campo que grava a próxima combinação pressionada (Esc cancela)."""
+    recorded = Signal(object)
+    recording = Signal(bool)
+
+    def __init__(self, combo):
+        super().__init__(str(combo))
+        self.combo = combo
+        self.active = False
+        self.setMinimumWidth(200)
+        self.clicked.connect(self.start)
+
+    def start(self):
+        self.active = True
+        self.setText("Pressione a combinação…")
+        self.recording.emit(True)
+
+    def stop(self, combo=None):
+        self.active = False
+        if combo:
+            self.combo = combo
+        self.setText(str(self.combo))
+        self.recording.emit(False)
+
+    def keyPressEvent(self, event):
+        if not self.active:
+            return super().keyPressEvent(event)
+        if event.key() == Qt.Key.Key_Escape:
+            self.stop()
+            return
+        combo = hotkeys.from_key_event(event)
+        if combo:
+            self.recorded.emit(combo)
+
+
+class ShortcutsPage(QWidget):
+    changed = Signal(str, object)  # ação, Combo
+    reset = Signal()
+    recording = Signal(bool)
+
+    def __init__(self, combos):
+        super().__init__()
+        self.buttons, self.errors = {}, {}
+        form = QFormLayout()
+        form.setHorizontalSpacing(24)
+        form.setVerticalSpacing(10)
+        for action, label in hotkeys.ACTIONS.items():
+            button = KeyButton(combos[action])
+            button.recorded.connect(lambda combo, a=action: self.changed.emit(a, combo))
+            button.recording.connect(self.recording)
+            error = muted("")
+            error.setObjectName("error")
+            self.buttons[action], self.errors[action] = button, error
+            column = QVBoxLayout()
+            column.addWidget(button)
+            column.addWidget(error)
+            form.addRow(label, column)
+        restore = QPushButton("Restaurar padrões")
+        restore.clicked.connect(self.reset)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(32, 24, 32, 24)
+        layout.addWidget(title("Atalhos"))
+        layout.addWidget(muted("Funcionam em qualquer app, inclusive com a chamada em primeiro plano. Use Ctrl ou Alt na "
+                               "combinação; clique no atalho e pressione a nova combinação (Esc cancela)."))
+        layout.addSpacing(12)
+        layout.addLayout(form)
+        layout.addWidget(restore, alignment=Qt.AlignmentFlag.AlignLeft)
+        layout.addStretch()
+
+    def show_result(self, action, combo, error):
+        self.buttons[action].stop(None if error else combo)
+        self.errors[action].setText(error or "")
+
+
 class SettingsPage(QWidget):
     theme_changed = Signal(str)  # system, light, dark
+    replay_tour = Signal()
 
     THEMES = [("Sistema", "system"), ("Claro", "light"), ("Escuro", "dark")]
 
@@ -128,6 +203,9 @@ class SettingsPage(QWidget):
         form = QFormLayout()
         form.setHorizontalSpacing(24)
         form.addRow("Tema", self.theme)
+        tour = QPushButton("Rever o tour")
+        tour.clicked.connect(self.replay_tour)
+        form.addRow("Tour de boas-vindas", tour)
         form.addRow("Versão", QLabel(__version__))
         layout = QVBoxLayout(self)
         layout.setContentsMargins(32, 24, 32, 24)
