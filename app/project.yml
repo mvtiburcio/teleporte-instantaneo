@@ -105,6 +105,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.mvtiburcio.ilusio.camera
+        # o macOS só acha a extensão se o arquivo for <bundle id>.systemextension
+        PRODUCT_NAME: $(PRODUCT_BUNDLE_IDENTIFIER)
         GENERATE_INFOPLIST_FILE: NO
         ENABLE_HARDENED_RUNTIME: YES
   IlusioTests:
