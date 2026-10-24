@@ -33,7 +33,13 @@ final class AppModel {
     var preferredCameraID: String? { didSet { UserDefaults.standard.set(preferredCameraID, forKey: "cameraID") } }
     var micName: String? { didSet { UserDefaults.standard.set(micName, forKey: "micName") } }
     /// Com o Ilusio ligado, o Ilusio Mic vira o microfone do sistema (pro WhatsApp, que esconde microfones virtuais).
-    var micAsSystem: Bool { didSet { UserDefaults.standard.set(micAsSystem, forKey: "micAsSystem") } }
+    var micAsSystem: Bool {
+        didSet {
+            UserDefaults.standard.set(micAsSystem, forKey: "micAsSystem")
+            guard running else { return }  // ligado: vale na hora
+            if micAsSystem { SystemAudio.takeDefaultInput() } else { SystemAudio.restoreDefaultInput() }
+        }
+    }
     var gain: Double {
         didSet { UserDefaults.standard.set(gain, forKey: "gain"); send("set", ["gain": gain]) }
     }
