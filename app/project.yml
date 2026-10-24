@@ -34,6 +34,9 @@ targets:
       properties:
         com.apple.developer.system-extension.install: true
         com.apple.security.application-groups: [$(TeamIdentifierPrefix)com.mvtiburcio.ilusio]
+        # hardened runtime (exigido pela notarização) bloqueia câmera e microfone sem estes
+        com.apple.security.device.camera: true
+        com.apple.security.device.audio-input: true
     dependencies:
       - target: IlusioCamera
         embed: true
@@ -71,6 +74,7 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_USER_SCRIPT_SANDBOXING: NO  # o script acima copia o driver pra dentro do app
+        ENABLE_HARDENED_RUNTIME: YES
       configs:
         Debug:
           ILUSIO_REPO_DIR: $(SRCROOT)/..

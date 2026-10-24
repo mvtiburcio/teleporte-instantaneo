@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- motor congelado (Python + MediaPipe) sob hardened runtime -->
+<plist version="1.0">
+<dict>
+	<!-- o motor abre o microfone (sounddevice) pra misturar com o som do efeito -->
+	<key>com.apple.security.device.audio-input</key>
+	<true/>
+	<!-- callbacks de áudio via cffi/ctypes geram trampolins em memória executável -->
+	<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+	<true/>
+</dict>
+</plist>
