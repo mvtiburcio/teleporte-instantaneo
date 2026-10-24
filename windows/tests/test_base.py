@@ -46,7 +46,7 @@ class WindowTest(unittest.TestCase):
         from PySide6.QtWidgets import QApplication
         from ilusio_win.app import MainWindow
         app = QApplication.instance() or QApplication([])
-        w = MainWindow(cameras=[])
+        w = MainWindow(cameras=[], mics=[])
         self.assertEqual(w.windowTitle(), "Ilusio")
         self.assertEqual(w.home.power.text(), "Ligar o Ilusio")
         self.assertFalse(w.home.power.isEnabled())  # sem câmera não liga
@@ -59,9 +59,9 @@ class CameraSwitchTest(unittest.TestCase):
         from ilusio_win.app import MainWindow
         from ilusio_win.devices import Camera
         app = QApplication.instance() or QApplication([])
-        w = MainWindow(cameras=[Camera(0, "Integrated Camera"), Camera(1, "USB Webcam")])
+        w = MainWindow(cameras=[Camera(0, "Integrated Camera"), Camera(1, "USB Webcam")], mics=[])
         started = []
-        w.worker.start = lambda index, fps=30: started.append(index)  # worker falso: sem câmera de verdade
+        w.worker.start = lambda index, **_: started.append(index)  # worker falso: sem câmera de verdade
         cls, original = type(w.worker), type(w.worker).running
         cls.running = property(lambda self: True)
         try:

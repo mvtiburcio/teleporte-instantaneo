@@ -29,6 +29,11 @@ def stylesheet(scheme):
     #preview[gesture="true"] {{ border: 2px solid {GREEN}; }}
     #chip {{ background: rgba(20, 20, 26, 150); color: #FFFFFF; border-radius: 11px; padding: 4px 10px; font-weight: 600; }}
     #guide {{ background: rgba(20, 20, 26, 190); color: #FFFFFF; border-radius: 16px; padding: 18px 28px; }}
+    QSlider::groove:horizontal {{ height: 4px; background: {p['border']}; border-radius: 2px; }}
+    QSlider::sub-page:horizontal {{ background: {ACCENT}; border-radius: 2px; }}
+    QSlider::handle:horizontal {{ background: {p['card']}; border: 4px solid {ACCENT}; width: 12px; height: 12px; margin: -7px 0; border-radius: 10px; }}
+    QProgressBar {{ background: {p['border']}; border: none; border-radius: 4px; }}
+    QProgressBar::chunk {{ background: {GREEN}; border-radius: 4px; }}
     #muted {{ color: {p['muted']}; background: transparent; }}
     #error {{ color: #E5484D; background: transparent; }}
     """

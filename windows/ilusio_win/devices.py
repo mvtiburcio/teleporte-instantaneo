@@ -37,3 +37,14 @@ def list_cameras():
             seen.add(info.name)
             cams.append(Camera(info.index, info.name))
     return real_cameras(cams)
+
+
+def list_mics():
+    """Microfones de verdade (sem as saídas virtuais do VB-Cable/BlackHole/Ilusio), sem repetir nome."""
+    import sounddevice as sd
+    import teleporte as tp
+    names = []
+    for d in sd.query_devices():
+        if d["max_input_channels"] > 0 and not any(v in d["name"] for v in tp.VIRTUAL_INS) and d["name"] not in names:
+            names.append(d["name"])
+    return names
