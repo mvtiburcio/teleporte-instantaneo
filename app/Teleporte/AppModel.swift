@@ -129,6 +129,16 @@ final class AppModel {
         return nil
     }
 
+    /// Durante a gravação de um atalho: o Carbon consome as combinações registradas antes da janela,
+    /// então sem isso apertar um atalho existente executaria a ação em vez de ser gravado.
+    func suspendShortcuts() {
+        for index in ShortcutAction.allCases.indices { HotKeyCenter.shared.unregister(id: UInt32(index + 1)) }
+    }
+
+    func resumeShortcuts() {
+        ShortcutAction.allCases.forEach(registerShortcut)
+    }
+
     func resetShortcuts() {
         for action in ShortcutAction.allCases {
             UserDefaults.standard.removeObject(forKey: "hotkey.\(action.rawValue)")

@@ -25,9 +25,20 @@ struct KeyCombo: Codable, Hashable, CustomStringConvertible {
     /// Combinação a partir de uma tecla pressionada; nil se não tiver ⌃ ou ⌘.
     init?(event: NSEvent) {
         let mods = Self.carbonModifiers(event.modifierFlags)
-        guard Self.isAllowed(modifiers: mods), let chars = event.charactersIgnoringModifiers, !chars.isEmpty else { return nil }
-        self.init(keyCode: UInt32(event.keyCode), modifiers: mods, key: chars.uppercased())
+        guard Self.isAllowed(modifiers: mods) else { return nil }
+        let key = Self.specialKeys[Int(event.keyCode)] ?? event.charactersIgnoringModifiers?.uppercased() ?? ""
+        guard !key.isEmpty else { return nil }
+        self.init(keyCode: UInt32(event.keyCode), modifiers: mods, key: key)
     }
+
+    /// Teclas cujo caractere não dá pra exibir (setas e F1–F12 vêm da área de uso privado do Unicode).
+    static let specialKeys: [Int: String] = {
+        var keys = [kVK_Space: "Espaço", kVK_Return: "↩", kVK_Tab: "⇥", kVK_Delete: "⌫",
+                    kVK_LeftArrow: "←", kVK_RightArrow: "→", kVK_UpArrow: "↑", kVK_DownArrow: "↓"]
+        let fKeys = [kVK_F1, kVK_F2, kVK_F3, kVK_F4, kVK_F5, kVK_F6, kVK_F7, kVK_F8, kVK_F9, kVK_F10, kVK_F11, kVK_F12]
+        for (i, code) in fKeys.enumerated() { keys[code] = "F\(i + 1)" }
+        return keys
+    }()
 
     init(keyCode: UInt32, modifiers: UInt32, key: String) {
         self.keyCode = keyCode

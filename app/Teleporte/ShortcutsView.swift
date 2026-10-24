@@ -56,6 +56,7 @@ struct KeyRecorder: View {
     private func start() {
         message = nil
         recording = true
+        model.suspendShortcuts()
         monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             MainActor.assumeIsolated {
                 if event.keyCode == UInt16(kVK_Escape) {
@@ -72,8 +73,10 @@ struct KeyRecorder: View {
     }
 
     private func stop() {
+        guard recording else { return }
         if let monitor { NSEvent.removeMonitor(monitor) }
         monitor = nil
         recording = false
+        model.resumeShortcuts()
     }
 }

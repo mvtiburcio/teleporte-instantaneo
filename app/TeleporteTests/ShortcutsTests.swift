@@ -37,3 +37,12 @@ final class ShortcutsTests: XCTestCase {
         XCTAssertEqual(Set(ShortcutAction.allCases.map(\.defaultCombo)).count, ShortcutAction.allCases.count)
     }
 }
+
+final class SpecialKeysTests: XCTestCase {
+    func testTeclasEspeciaisTemNomeLegivel() {
+        XCTAssertEqual(KeyCombo.specialKeys[kVK_Space], "Espaço")
+        XCTAssertEqual(KeyCombo.specialKeys[kVK_LeftArrow], "←")
+        XCTAssertEqual(KeyCombo.specialKeys[kVK_F1], "F1")
+        XCTAssertEqual(KeyCombo.specialKeys[kVK_F12], "F12")
+    }
+}
