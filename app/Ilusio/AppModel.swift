@@ -115,6 +115,7 @@ final class AppModel {
     private func devicesChanged() {
         let using = cameraID
         refreshDevices()
+        refreshChecks()  // microfone ou câmera do Ilusio acabaram de aparecer
         guard running, let cameraID, cameraID != using else { return }
         if cameraID != preferredCameraID {
             lastError = "A câmera em uso foi desconectada; usando \(cameras.first { $0.id == cameraID }?.name ?? "outra câmera")."
@@ -203,8 +204,14 @@ final class AppModel {
             if !quiet { cameraMessage = "Mova o Ilusio para a pasta Aplicativos e abra de novo: o macOS só ativa a câmera de lá." }
             return
         }
+        // um pedido por vez: um novo substituiria o anterior e os retornos dele se perderiam
+        guard activation == nil else {
+            if !quiet { cameraMessage = "Aguardando a sua aprovação em Ajustes do Sistema." }
+            return
+        }
         let activation = CameraActivation { [weak self] text in
             if !(quiet && text == CameraActivation.doneText) { self?.cameraMessage = text }
+            if text != CameraActivation.approvalText { self?.activation = nil }  // terminou (sucesso, erro ou reinício)
             self?.refreshChecks()
         }
         self.activation = activation
@@ -213,10 +220,22 @@ final class AppModel {
 
     /// Instala o "Ilusio Mic" (pede a senha de administrador uma vez).
     func installMic() async {
+        guard !installingMic else { return }  // clique repetido pediria a senha de novo
         installingMic = true
-        micMessage = await Task.detached { VirtualMic.install() }.value
-        installingMic = false
-        refreshChecks()
+        defer { installingMic = false }
+        let result = await Task.detached { VirtualMic.install() }.value
+        guard result == VirtualMic.doneText else {
+            micMessage = result
+            return
+        }
+        // o coreaudiod leva alguns segundos pra reiniciar e anunciar o "Ilusio Mic": espera em vez de
+        // conferir uma vez só (antes, parecia que não tinha instalado e a pessoa clicava de novo)
+        micMessage = "Ativando o microfone…"
+        for _ in 0..<30 where !checks.virtualAudio {
+            try? await Task.sleep(for: .milliseconds(500))
+            refreshChecks()
+        }
+        micMessage = checks.virtualAudio ? result : "Instalado, mas o macOS ainda não mostrou o microfone. Se em 1 minuto não aparecer, reinicie o Mac."
     }
 
     func toggleRunning() async {
