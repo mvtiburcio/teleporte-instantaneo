@@ -6,6 +6,10 @@ on:
   push:
     branches: [main]
 
+# o job só lê o repositório: dependência comprometida não ganha escrita pelo token
+permissions:
+  contents: read
+
 jobs:
   motor:
     runs-on: windows-latest
