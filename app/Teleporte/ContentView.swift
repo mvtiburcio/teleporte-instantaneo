@@ -22,7 +22,7 @@ struct ContentView: View {
     @Environment(AppModel.self) private var model
     @State private var section: Section? = .home
     @AppStorage("theme") private var theme: AppTheme = .system
-    @AppStorage("onboarded") private var onboarded = false
+    @AppStorage(OnboardingView.doneKey) private var onboarded = false
 
     var body: some View {
         Group {

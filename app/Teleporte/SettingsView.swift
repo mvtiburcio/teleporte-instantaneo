@@ -25,7 +25,7 @@ enum AppTheme: String, CaseIterable, Identifiable {
 /// Aba "Ajustes": tema do app e ajuda pra suporte.
 struct SettingsView: View {
     @AppStorage("theme") private var theme: AppTheme = .system
-    @AppStorage("onboarded") private var onboarded = true
+    @AppStorage(OnboardingView.doneKey) private var onboarded = false
 
     var body: some View {
         Form {

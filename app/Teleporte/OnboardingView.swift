@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Tour da primeira abertura: ilustração à esquerda, texto e passos à direita. Termina abrindo a Configuração.
 struct OnboardingView: View {
+    static let doneKey = "onboarded"  // UserDefaults: o tour já foi visto
     var finish: (_ openSetup: Bool) -> Void
     @State private var step = 0
 
