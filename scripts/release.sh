@@ -78,7 +78,7 @@ if [ $NOTARIZE = 1 ]; then
   xcrun stapler staple "$DMG"
   spctl -a -t open --context context:primary-signature -v "$DMG"
 fi
-shasum -a 256 "$DMG" | tee "$DMG.sha256"
+(cd "$OUT" && shasum -a 256 "${DMG:t}" | tee "${DMG:t}.sha256")  # só o nome: o caminho local não vai pro arquivo público
 
 if [ $PUBLISH = 1 ]; then
   echo "==> 6/6 release no GitHub (rascunho)"
