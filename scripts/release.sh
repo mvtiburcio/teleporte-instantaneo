@@ -85,6 +85,12 @@ if [ $PUBLISH = 1 ]; then
   # a tag nasce no commit compilado, não na ponta da main de quando o rascunho for publicado
   [ -n "$(git branch -r --contains HEAD)" ] || { echo "faça push deste commit antes de publicar" >&2; exit 1; }
   gh release create "v$VERSION" "$DMG" "$DMG.sha256" --draft --target "$(git rev-parse HEAD)" --title "Ilusio $VERSION" \
-    --notes "Baixe o Ilusio-$VERSION.dmg, arraste o Ilusio para Aplicativos e abra. O app guia o resto (câmera e microfone do Ilusio, fundo, gesto). macOS 26+, Apple Silicon."
+    --notes "Baixe o Ilusio-$VERSION.dmg, arraste o Ilusio para Aplicativos e abra. O app guia o resto (câmera e microfone do Ilusio, fundo, gesto). macOS 26+, Apple Silicon.
+
+Windows 10/11 x64: baixe o Ilusio-Setup-$VERSION.exe. Sem assinatura, o Windows avisa no primeiro uso: Mais informações → Executar assim mesmo."
+  # o instalador do Windows sai do CI (a partir da main) e entra neste mesmo rascunho: publique só depois que ele aparecer
+  [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || echo "aviso: o instalador do Windows sai da main, não deste commit" >&2
+  gh workflow run windows.yml --ref main -f version="$VERSION"
+  echo "Acompanhe o instalador do Windows: gh run watch \$(gh run list --workflow windows.yml --limit 1 --json databaseId -q '.[0].databaseId')"
 fi
 echo "Pronto: $DMG"

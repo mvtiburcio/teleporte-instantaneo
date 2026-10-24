@@ -10,7 +10,16 @@ from PySide6.QtWidgets import QApplication
 from ilusio_win.app import MainWindow
 
 
+def check():
+    """Ilusio.exe --check (CI): o executável congelado acha o som e carrega os modelos do MediaPipe."""
+    import teleporte as tp
+    tp.Teleporter(on_fire=lambda: None)
+    return 0 if os.path.exists(tp.SOUND) else 1
+
+
 def main():
+    if "--check" in sys.argv:
+        return check()
     app = QApplication(sys.argv)
     app.setApplicationName("Ilusio")
     window = MainWindow()
