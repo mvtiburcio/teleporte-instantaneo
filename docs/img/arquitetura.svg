@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#475569"/>
+    </marker>
+    <style>
+      .box { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; rx: 10; }
+      .core { fill: #fff7ed; stroke: #f97316; stroke-width: 2; rx: 12; }
+      .virt { fill: #eef2ff; stroke: #6366f1; stroke-width: 1.5; rx: 10; }
+      .call { fill: #ecfdf5; stroke: #10b981; stroke-width: 1.5; rx: 10; }
+      .t { fill: #0f172a; font-weight: 600; }
+      .s { fill: #475569; font-size: 12px; }
+      .h { fill: #64748b; font-size: 12px; font-weight: 600; letter-spacing: .08em; }
+      line, path.l { stroke: #475569; stroke-width: 1.8; fill: none; }
+    </style>
+  </defs>
+  <rect width="960" height="420" fill="#ffffff"/>
+
+  <text class="h" x="30" y="34">VÍDEO</text>
+  <text class="h" x="30" y="254">ÁUDIO</text>
+
+  <rect class="box" x="30" y="60" width="150" height="70"/>
+  <text class="t" x="105" y="92" text-anchor="middle">Webcam</text>
+  <text class="s" x="105" y="112" text-anchor="middle">1280×720</text>
+
+  <rect class="box" x="30" y="280" width="150" height="56"/>
+  <text class="t" x="105" y="304" text-anchor="middle">Microfone</text>
+  <text class="s" x="105" y="322" text-anchor="middle">AirPods / MacBook</text>
+
+  <rect class="box" x="30" y="350" width="150" height="56"/>
+  <text class="t" x="105" y="374" text-anchor="middle">teleport.wav</text>
+  <text class="s" x="105" y="392" text-anchor="middle">som do Goku</text>
+
+  <rect class="core" x="250" y="40" width="270" height="366"/>
+  <text class="t" x="385" y="68" text-anchor="middle" font-size="16">teleporte.py</text>
+  <text class="s" x="270" y="98">MediaPipe Hands + Face</text>
+  <text class="s" x="282" y="116">→ detecta os dois dedos na testa</text>
+  <text class="s" x="270" y="142">MediaPipe Selfie Segmentation</text>
+  <text class="s" x="282" y="160">→ recorta a sua silhueta</text>
+  <text class="s" x="270" y="186">Efeito (OpenCV)</text>
+  <text class="s" x="282" y="204">→ borrão vertical + riscos + piscadas</text>
+  <text class="s" x="282" y="222">→ troca você pelo fundo gravado</text>
+  <line x1="270" y1="246" x2="500" y2="246" stroke="#fdba74" stroke-dasharray="4 4"/>
+  <text class="s" x="270" y="274">Mixer de áudio (sounddevice)</text>
+  <text class="s" x="282" y="292">→ microfone + som no gatilho</text>
+  <text class="s" x="282" y="310">→ 48 kHz, blocos de 10 ms</text>
+  <text class="s" x="270" y="344">afplay</text>
+  <text class="s" x="282" y="362">→ toca o som pra você também</text>
+
+  <rect class="virt" x="590" y="60" width="160" height="70"/>
+  <text class="t" x="670" y="92" text-anchor="middle">OBS Virtual</text>
+  <text class="t" x="670" y="110" text-anchor="middle">Camera</text>
+
+  <rect class="virt" x="590" y="280" width="160" height="56"/>
+  <text class="t" x="670" y="304" text-anchor="middle">BlackHole 2ch</text>
+  <text class="s" x="670" y="322" text-anchor="middle">placa de som virtual</text>
+
+  <rect class="call" x="810" y="150" width="130" height="110"/>
+  <text class="t" x="875" y="194" text-anchor="middle">Meet</text>
+  <text class="t" x="875" y="214" text-anchor="middle">WhatsApp</text>
+  <text class="s" x="875" y="234" text-anchor="middle">Zoom, Teams…</text>
+
+  <rect class="box" x="590" y="350" width="160" height="56"/>
+  <text class="t" x="670" y="383" text-anchor="middle">Seus fones</text>
+
+  <line x1="180" y1="95" x2="248" y2="95" marker-end="url(#a)"/>
+  <line x1="180" y1="308" x2="248" y2="308" marker-end="url(#a)"/>
+  <line x1="180" y1="378" x2="248" y2="378" marker-end="url(#a)"/>
+  <line x1="520" y1="95" x2="588" y2="95" marker-end="url(#a)"/>
+  <line x1="520" y1="308" x2="588" y2="308" marker-end="url(#a)"/>
+  <line x1="520" y1="378" x2="588" y2="378" marker-end="url(#a)"/>
+  <path class="l" d="M750,95 C790,95 790,180 808,185" marker-end="url(#a)"/>
+  <path class="l" d="M750,308 C790,308 790,230 808,225" marker-end="url(#a)"/>
+  <text class="s" x="760" y="140">câmera</text>
+  <text class="s" x="752" y="282">microfone</text>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 400" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14">
+  <style>
+    .t { fill: #0f172a; font-weight: 600; }
+    .s { fill: #475569; font-size: 13px; }
+    .ok { fill: #16a34a; font-weight: 600; }
+    .no { fill: #dc2626; font-weight: 600; }
+  </style>
+  <rect width="760" height="400" fill="#ffffff"/>
+
+  <!-- rosto -->
+  <ellipse cx="190" cy="215" rx="110" ry="140" fill="#fde7d4" stroke="#d6a77a" stroke-width="2"/>
+  <ellipse cx="150" cy="215" rx="16" ry="9" fill="#334155"/>
+  <ellipse cx="230" cy="215" rx="16" ry="9" fill="#334155"/>
+  <line x1="150" y1="240" x2="230" y2="240" stroke="#94a3b8" stroke-dasharray="4 3"/>
+  <text class="s" x="190" y="258" text-anchor="middle">distância entre os olhos (d)</text>
+  <path d="M160,300 Q190,318 220,300" stroke="#b45309" stroke-width="3" fill="none"/>
+
+  <!-- testa e tolerância -->
+  <circle cx="190" cy="167" r="72" fill="#22c55e" fill-opacity=".12" stroke="#16a34a" stroke-dasharray="6 4" stroke-width="2"/>
+  <circle cx="190" cy="167" r="6" fill="#dc2626"/>
+  <text class="s" x="200" y="160">testa = meio dos olhos − 0,6·d</text>
+  <text class="s" x="104" y="88">área aceita: raio = REACH·d (1,5·d)</text>
+
+  <!-- dois dedos -->
+  <rect x="172" y="140" width="16" height="70" rx="8" fill="#f5c6a5" stroke="#c2410c" stroke-width="1.5"/>
+  <rect x="190" y="136" width="16" height="74" rx="8" fill="#f5c6a5" stroke="#c2410c" stroke-width="1.5"/>
+
+  <!-- regras -->
+  <text class="t" x="380" y="70" font-size="18">O gesto reconhecido</text>
+  <text class="ok" x="380" y="110">✓ indicador e médio esticados</text>
+  <text class="ok" x="380" y="140">✓ os dois juntos</text>
+  <text class="ok" x="380" y="170">✓ anelar e mindinho dobrados</text>
+  <text class="ok" x="380" y="200">✓ pontas dos dedos dentro da área verde</text>
+  <text class="ok" x="380" y="230">✓ segurado por 0,25 s</text>
+  <text class="no" x="380" y="270">✗ mão aberta, joinha ou um dedo só</text>
+  <text class="s" x="380" y="310">A área cresce com o seu rosto na imagem,</text>
+  <text class="s" x="380" y="330">então funciona sentado perto ou em pé longe.</text>
+  <text class="s" x="380" y="360">Uma bolinha verde na janela "teleporte"</text>
+  <text class="s" x="380" y="380">confirma que o gesto foi visto.</text>
+</svg>
