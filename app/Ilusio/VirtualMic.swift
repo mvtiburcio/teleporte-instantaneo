@@ -4,6 +4,7 @@ import Foundation
 /// que vai dentro do app e é instalado em /Library/Audio/Plug-Ins/HAL com a senha de administrador, uma vez.
 enum VirtualMic {
     static let deviceName = "Ilusio Mic"
+    static let doneText = "Microfone do Ilusio instalado. O áudio do Mac pode ter cortado por 2 segundos."
     static let installedPath = "/Library/Audio/Plug-Ins/HAL/IlusioMic.driver"
 
     static var bundled: URL? { Bundle.main.url(forResource: "IlusioMic", withExtension: "driver") }
@@ -44,6 +45,6 @@ enum VirtualMic {
                 ? "Instalação cancelada."
                 : "Não deu pra instalar o microfone: \(error[NSAppleScript.errorMessage] as? String ?? "erro desconhecido")."
         }
-        return "Microfone do Ilusio instalado. O áudio do Mac pode ter cortado por 2 segundos."
+        return doneText
     }
 }
