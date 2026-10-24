@@ -22,8 +22,24 @@ struct ContentView: View {
     @Environment(AppModel.self) private var model
     @State private var section: Section? = .home
     @AppStorage("theme") private var theme: AppTheme = .system
+    @AppStorage("onboarded") private var onboarded = false
 
     var body: some View {
+        Group {
+            if onboarded {
+                main
+            } else {
+                OnboardingView { openSetup in
+                    if openSetup { section = .setup }
+                    onboarded = true
+                }
+            }
+        }
+        .frame(minWidth: 900, minHeight: 620)
+        .onChange(of: theme, initial: true) { NSApp.appearance = theme.appearance }
+    }
+
+    private var main: some View {
         NavigationSplitView {
             List(Section.allCases, selection: $section) { s in
                 if s == .setup, model.checks.doneCount < SetupItem.allCases.count {
@@ -43,7 +59,5 @@ struct ContentView: View {
             case .settings: SettingsView()
             }
         }
-        .frame(minWidth: 900, minHeight: 620)
-        .onChange(of: theme, initial: true) { NSApp.appearance = theme.appearance }
     }
 }
