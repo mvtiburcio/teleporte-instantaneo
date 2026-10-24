@@ -2,7 +2,7 @@
 
 Faça o **Teletransporte Instantâneo do Goku** numa videochamada de verdade: coloque **dois dedos na testa**, ouça o *"vuush"* e **suma da câmera** — com os riscos verticais clássicos do anime. Faça o gesto de novo e você **reaparece**, de onde estiver.
 
-Funciona no **Google Meet, WhatsApp (app do Mac), Zoom, Teams** e qualquer app que deixe escolher câmera e microfone.
+Testado no **Google Meet**. Deve funcionar também no **WhatsApp (app do Mac), Zoom, Teams** e em qualquer app que deixe escolher câmera e microfone.
 
 <p align="center">
   <img src="docs/img/efeito.gif" alt="Demonstração: a pessoa é coberta por riscos verticais, pisca e some, ficando só o fundo; depois reaparece" width="640">
@@ -129,7 +129,7 @@ Se o app não deixar escolher o microfone: **Ajustes do Sistema → Som → Entr
 
 ### 4. Teleportar
 
-- **Dois dedos na testa** por meio segundo → som + riscos → você some.
+- **Dois dedos na testa** por um instante (~0,25 s) → som + riscos → você some.
 - **Dois dedos na testa de novo** → você reaparece com o mesmo efeito ao contrário. Pode ser de outro lugar do quarto, em pé, longe da câmera.
 
 ### 5. Depois da chamada

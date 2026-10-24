@@ -58,8 +58,11 @@ def open_mic_bridge():
         print("BlackHole não instalado: o som do teleporte toca só aqui, a chamada não ouve.")
         return None
     mic = sd.default.device[0]
-    if "BlackHole" in devs[mic]["name"]:
-        mic = next(i for i, d in enumerate(devs) if d["max_input_channels"] > 0 and "BlackHole" not in d["name"])
+    if mic < 0 or "BlackHole" in devs[mic]["name"]:  # sem entrada padrão, ou entrada do sistema já no BlackHole
+        mic = next((i for i, d in enumerate(devs) if d["max_input_channels"] > 0 and "BlackHole" not in d["name"]), None)
+    if mic is None:
+        print("Nenhum microfone encontrado: a câmera funciona, mas a chamada não recebe áudio deste script.")
+        return None
     print(f"Microfone '{devs[mic]['name']}' + teleporte -> BlackHole. Na chamada, escolha o microfone 'BlackHole 2ch'.")
     streams = (sd.InputStream(device=mic, samplerate=SR, channels=1, dtype="float32", blocksize=BLOCK, callback=on_mic),
                sd.OutputStream(device=bh, samplerate=SR, channels=2, dtype="float32", blocksize=BLOCK, callback=on_audio))
