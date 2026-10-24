@@ -206,10 +206,11 @@ final class AppModel {
         }
         // um pedido por vez: um novo substituiria o anterior e os retornos dele se perderiam
         guard activation == nil else {
-            if !quiet { cameraMessage = "Aguardando a sua aprovação em Ajustes do Sistema." }
+            // pedido pendente: o botão leva de novo aos Ajustes em vez de pedir outra vez
+            if !quiet { NSWorkspace.shared.open(VirtualCamera.approvalSettingsURL) }
             return
         }
-        let activation = CameraActivation { [weak self] text in
+        let activation = CameraActivation(opensSettings: !quiet) { [weak self] text in
             if !(quiet && text == CameraActivation.doneText) { self?.cameraMessage = text }
             if text != CameraActivation.approvalText { self?.activation = nil }  // terminou (sucesso, erro ou reinício)
             self?.refreshChecks()

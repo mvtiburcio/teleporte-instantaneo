@@ -1,3 +1,4 @@
+import AppKit
 import AVFoundation
 import CoreMediaIO
 import Foundation
@@ -14,6 +15,9 @@ enum VirtualCamera {
             .devices.contains { $0.localizedName == deviceName }
     }
 
+    /// Painel "Itens de Início e Extensões" dos Ajustes do Sistema, onde fica a aprovação de Extensões de Câmera.
+    static let approvalSettingsURL = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension")!
+
     /// O macOS só ativa system extensions de apps que estão em /Applications.
     static var appIsInApplications: Bool { Bundle.main.bundlePath.hasPrefix("/Applications/") }
 }
@@ -23,8 +27,10 @@ final class CameraActivation: NSObject, OSSystemExtensionRequestDelegate {
     static let doneText = "Câmera do Ilusio ativada."
     static let approvalText = "Agora aprove em Ajustes do Sistema ▸ Geral ▸ Itens de Início e Extensões ▸ Extensões de Câmera."
     private let done: @MainActor (String) -> Void
+    private let opensSettings: Bool  // false no pedido silencioso da abertura: nada abre sem a pessoa pedir
 
-    init(done: @escaping @MainActor (String) -> Void) {
+    init(opensSettings: Bool = true, done: @escaping @MainActor (String) -> Void) {
+        self.opensSettings = opensSettings
         self.done = done
     }
 
@@ -44,6 +50,7 @@ final class CameraActivation: NSObject, OSSystemExtensionRequestDelegate {
     }
 
     func requestNeedsUserApproval(_ request: OSSystemExtensionRequest) {
+        if opensSettings { NSWorkspace.shared.open(VirtualCamera.approvalSettingsURL) }  // leva até onde aprova
         report(Self.approvalText)
     }
 
