@@ -11,7 +11,7 @@ from .devices import backend
 
 class EngineWorker(QObject):
     frame = Signal(QImage)  # prévia espelhada, ~15 fps
-    state = Signal(dict)    # hidden, bg_ready, bg_countdown, gesture, fps, vcam, audio (~5 por segundo)
+    state = Signal(dict)    # hidden, bg_ready, bg_countdown, gesture, fps, vcam, audio, rms (~5 por segundo)
     failed = Signal(str)
     stopped = Signal()
 
@@ -24,11 +24,11 @@ class EngineWorker(QObject):
     def running(self):
         return self._thread is not None and self._thread.is_alive()
 
-    def start(self, camera_index, fps=30, gain=tp.SFX_GAIN, reach=tp.REACH):
+    def start(self, camera_index, fps=30, gain=tp.SFX_GAIN, reach=tp.REACH, mic=None):
         if self.running:
             return
         self._cmds = queue.Queue()
-        self._thread = threading.Thread(target=self._run, args=(camera_index, fps, gain, reach), daemon=True)
+        self._thread = threading.Thread(target=self._run, args=(camera_index, fps, gain, reach, mic), daemon=True)
         self._thread.start()
 
     def send(self, cmd, **fields):
@@ -37,15 +37,15 @@ class EngineWorker(QObject):
     def stop(self):
         self.send("stop")
 
-    def _run(self, camera_index, fps, gain, reach):
+    def _run(self, camera_index, fps, gain, reach, mic):
         try:
-            self._loop(camera_index, fps, gain, reach)
+            self._loop(camera_index, fps, gain, reach, mic)
         except Exception as e:  # qualquer falha vira mensagem na tela em vez de matar o app
             self.failed.emit(f"O motor parou: {e}")
         finally:
             self.stopped.emit()
 
-    def _loop(self, camera_index, fps, gain, reach):
+    def _loop(self, camera_index, fps, gain, reach, mic):
         if not os.path.exists(tp.SOUND):
             raise RuntimeError("som do efeito não encontrado")
         tp.sfx, tp.sfx_gain = tp.load_sfx(), gain
@@ -55,7 +55,7 @@ class EngineWorker(QObject):
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, tp.W)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, tp.H)
         cap.set(cv2.CAP_PROP_FPS, fps)
-        bridge = tp.open_mic_bridge()  # guarda a referência: os fluxos de áudio vivem enquanto ela existir
+        bridge = tp.open_mic_bridge(mic or None)  # guarda a referência: os fluxos de áudio vivem enquanto ela existir
         vcam = self._open_vcam(fps)
         engine = tp.Teleporter(tp.fire_sound)
         engine.reach = reach
@@ -72,6 +72,7 @@ class EngineWorker(QObject):
                 elif cmd == "capture_bg": engine.capture_bg(now, f.get("delay", tp.BG_DELAY_S))
                 elif cmd == "toggle": engine.fire(now)
                 elif cmd == "reappear": engine.reappear()
+                elif cmd == "test_sound": tp.fire_sound()
                 elif cmd == "set":
                     tp.sfx_gain = f.get("gain", tp.sfx_gain)
                     engine.reach = f.get("reach", engine.reach)
@@ -90,7 +91,7 @@ class EngineWorker(QObject):
                     self.state.emit({"hidden": engine.hidden, "bg_ready": engine.bg is not None,
                                      "bg_countdown": engine.bg_countdown(now), "gesture": engine.sign,
                                      "fps": frames / max(now - t0, 1e-6), "vcam": vcam is not None,
-                                     "audio": bridge is not None})
+                                     "audio": bridge is not None, "rms": tp.mic_rms})
                     next_state, t0, frames = now + 0.2, now, 0
         finally:
             cap.release()
