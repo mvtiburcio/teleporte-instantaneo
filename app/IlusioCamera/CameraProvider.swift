@@ -27,6 +27,11 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
     private var format: CMFormatDescription!  // 420v, o que a chamada vê
     private var pool: CVPixelBufferPool!
     private var transfer: VTPixelTransferSession?
+    private let color: NSDictionary = [  // Rec. 709, o padrão de câmera HD
+        kCVImageBufferYCbCrMatrixKey: kCVImageBufferYCbCrMatrix_ITU_R_709_2,
+        kCVImageBufferColorPrimariesKey: kCVImageBufferColorPrimaries_ITU_R_709_2,
+        kCVImageBufferTransferFunctionKey: kCVImageBufferTransferFunction_ITU_R_709_2,
+    ]
     private let queue = DispatchQueue(label: "ilusio.camera", qos: .userInteractive)
     private var timer: DispatchSourceTimer?
     private var sourceClients = 0
@@ -37,11 +42,6 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
     init(localizedName: String) {
         super.init()
         device = CMIOExtensionDevice(localizedName: localizedName, deviceID: deviceID, legacyDeviceID: nil, source: self)
-        let color: NSDictionary = [  // Rec. 709, o padrão de câmera HD
-            kCVImageBufferYCbCrMatrixKey: kCVImageBufferYCbCrMatrix_ITU_R_709_2,
-            kCVImageBufferColorPrimariesKey: kCVImageBufferColorPrimaries_ITU_R_709_2,
-            kCVImageBufferTransferFunctionKey: kCVImageBufferTransferFunction_ITU_R_709_2,
-        ]
         CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
                                        width: width, height: height, extensions: color, formatDescriptionOut: &format)
         var sinkFormat: CMFormatDescription!
@@ -127,7 +127,14 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
     private func yuv(_ bgra: CVPixelBuffer) -> CVPixelBuffer? {
         var out: CVPixelBuffer?
         CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &out)
-        guard let transfer, let out, VTPixelTransferSessionTransferImage(transfer, from: bgra, to: out) == noErr else { return nil }
+        guard let transfer, let out else { return nil }
+        let status = VTPixelTransferSessionTransferImage(transfer, from: bgra, to: out)
+        guard status == noErr else {
+            log.error("conversão pra 420v falhou: \(status)")
+            return nil
+        }
+        // o VT só grava a matriz; sem primárias e transferência o buffer não bate com o formato (-12743)
+        CVBufferSetAttachments(out, color, .shouldPropagate)
         return out
     }
 
@@ -138,7 +145,10 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
         CMSampleBufferCreateForImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: pixelBuffer, dataReady: true,
                                            makeDataReadyCallback: nil, refcon: nil, formatDescription: format,
                                            sampleTiming: &timing, sampleBufferOut: &sample)
-        guard let sample else { return }
+        guard let sample else {
+            log.error("frame não bate com o formato da câmera")
+            return
+        }
         source.stream.send(sample, discontinuity: [],
                            hostTimeInNanoseconds: UInt64(timing.presentationTimeStamp.seconds * Double(NSEC_PER_SEC)))
     }
