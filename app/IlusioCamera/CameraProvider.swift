@@ -3,9 +3,12 @@ import CoreText
 import Foundation
 import IOKit.audio
 import os.log
+import VideoToolbox
 
 // "Ilusio Camera": o app escreve os frames com o efeito no fluxo sink, e a extensão repassa pro fluxo
 // source, que é o que a chamada vê. Sem frames do app, mostra um quadro de espera em vez de congelar.
+// O app manda BGRA; a chamada recebe 420v (YUV), o formato das câmeras de verdade: o WhatsApp (app de iPad,
+// pilha de captura do iOS) não monta a sessão com uma câmera BGRA (erro -12780, tela preta).
 
 let cameraName = "Ilusio Camera"
 let frameRate = 30
@@ -21,8 +24,9 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
     private(set) var device: CMIOExtensionDevice!
     private var source: CameraStreamSource!
     private var sink: CameraStreamSource!
-    private var format: CMFormatDescription!
+    private var format: CMFormatDescription!  // 420v, o que a chamada vê
     private var pool: CVPixelBufferPool!
+    private var transfer: VTPixelTransferSession?
     private let queue = DispatchQueue(label: "ilusio.camera", qos: .userInteractive)
     private var timer: DispatchSourceTimer?
     private var sourceClients = 0
@@ -33,23 +37,42 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
     init(localizedName: String) {
         super.init()
         device = CMIOExtensionDevice(localizedName: localizedName, deviceID: deviceID, legacyDeviceID: nil, source: self)
+        let color: NSDictionary = [  // Rec. 709, o padrão de câmera HD
+            kCVImageBufferYCbCrMatrixKey: kCVImageBufferYCbCrMatrix_ITU_R_709_2,
+            kCVImageBufferColorPrimariesKey: kCVImageBufferColorPrimaries_ITU_R_709_2,
+            kCVImageBufferTransferFunctionKey: kCVImageBufferTransferFunction_ITU_R_709_2,
+        ]
+        CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+                                       width: width, height: height, extensions: color, formatDescriptionOut: &format)
+        var sinkFormat: CMFormatDescription!
         CMVideoFormatDescriptionCreate(allocator: kCFAllocatorDefault, codecType: kCVPixelFormatType_32BGRA,
-                                       width: width, height: height, extensions: nil, formatDescriptionOut: &format)
+                                       width: width, height: height, extensions: nil, formatDescriptionOut: &sinkFormat)
         let attributes: NSDictionary = [
             kCVPixelBufferWidthKey: width,
             kCVPixelBufferHeightKey: height,
-            kCVPixelBufferPixelFormatTypeKey: kCVPixelFormatType_32BGRA,
+            kCVPixelBufferPixelFormatTypeKey: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
             kCVPixelBufferIOSurfacePropertiesKey: [:] as NSDictionary,
         ]
         CVPixelBufferPoolCreate(kCFAllocatorDefault, nil, attributes, &pool)
+        VTPixelTransferSessionCreate(allocator: kCFAllocatorDefault, pixelTransferSessionOut: &transfer)
+        if let transfer {
+            VTSessionSetProperty(transfer, key: kVTPixelTransferPropertyKey_DestinationYCbCrMatrix,
+                                 value: kCVImageBufferYCbCrMatrix_ITU_R_709_2)
+            VTSessionSetProperty(transfer, key: kVTPixelTransferPropertyKey_DestinationColorPrimaries,
+                                 value: kCVImageBufferColorPrimaries_ITU_R_709_2)
+            VTSessionSetProperty(transfer, key: kVTPixelTransferPropertyKey_DestinationTransferFunction,
+                                 value: kCVImageBufferTransferFunction_ITU_R_709_2)
+        }
         // 15 a 60 fps: a chamada escolhe; os frames do app passam na velocidade em que chegam
         let durations = [60, 30, 15].map { CMTime(value: 1, timescale: Int32($0)) }
-        let streamFormat = CMIOExtensionStreamFormat(formatDescription: format, maxFrameDuration: durations[2],
-                                                     minFrameDuration: durations[0], validFrameDurations: durations)
+        let streamFormat = { (description: CMFormatDescription) in
+            CMIOExtensionStreamFormat(formatDescription: description, maxFrameDuration: durations[2],
+                                      minFrameDuration: durations[0], validFrameDurations: durations)
+        }
         source = CameraStreamSource(localizedName: "Ilusio.Video", streamID: sourceID, direction: .source,
-                                    format: streamFormat, device: self)
+                                    format: streamFormat(format), device: self)
         sink = CameraStreamSource(localizedName: "Ilusio.Sink", streamID: sinkID, direction: .sink,
-                                  format: streamFormat, device: self)
+                                  format: streamFormat(sinkFormat), device: self)
         do {
             try device.addStream(source.stream)
             try device.addStream(sink.stream)
@@ -96,8 +119,16 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
 
     private func sendPlaceholderIfIdle() {
         guard DispatchTime.now().uptimeNanoseconds - lastSinkFrame.uptimeNanoseconds > 500_000_000 else { return }
-        if placeholder == nil { placeholder = makePlaceholder() }
+        if placeholder == nil { placeholder = makePlaceholder().flatMap(yuv) }
         if let placeholder { send(placeholder) }
+    }
+
+    /// BGRA do app → 420v da chamada.
+    private func yuv(_ bgra: CVPixelBuffer) -> CVPixelBuffer? {
+        var out: CVPixelBuffer?
+        CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &out)
+        guard let transfer, let out, VTPixelTransferSessionTransferImage(transfer, from: bgra, to: out) == noErr else { return nil }
+        return out
     }
 
     private func send(_ pixelBuffer: CVPixelBuffer) {
@@ -112,10 +143,10 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
                            hostTimeInNanoseconds: UInt64(timing.presentationTimeStamp.seconds * Double(NSEC_PER_SEC)))
     }
 
-    /// Quadro escuro com "Abra o Ilusio" no meio.
+    /// Quadro escuro com "Abra o Ilusio" no meio (BGRA; vira 420v no yuv).
     private func makePlaceholder() -> CVPixelBuffer? {
         var buffer: CVPixelBuffer?
-        CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, pool, &buffer)
+        CVPixelBufferCreate(kCFAllocatorDefault, Int(width), Int(height), kCVPixelFormatType_32BGRA, nil, &buffer)
         guard let buffer else { return nil }
         CVPixelBufferLockBaseAddress(buffer, [])
         defer { CVPixelBufferUnlockBaseAddress(buffer, []) }
@@ -158,7 +189,7 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
                 guard self.sinkClient === client else { return }
                 if let sample, let pixels = CMSampleBufferGetImageBuffer(sample) {
                     self.lastSinkFrame = .now()
-                    if self.sourceClients > 0 { self.send(pixels) }
+                    if self.sourceClients > 0, let frame = self.yuv(pixels) { self.send(frame) }
                     let now = CMClockGetTime(CMClockGetHostTimeClock())
                     self.sink.stream.notifyScheduledOutputChanged(CMIOExtensionScheduledOutput(
                         sequenceNumber: sequence, hostTimeInNanoseconds: UInt64(now.seconds * Double(NSEC_PER_SEC))))
