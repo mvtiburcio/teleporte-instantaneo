@@ -43,7 +43,7 @@ struct DevicesView: View {
             } header: {
                 Text("Microfone")
             } footer: {
-                Text("O Ilusio mistura este microfone com o som do efeito. Na chamada, escolha “Ilusio Mic”. Apps que escondem microfones virtuais (como o WhatsApp) funcionam com “Usar a configuração do sistema”: o Ilusio põe o Ilusio Mic como padrão enquanto estiver ligado e devolve o seu microfone ao desligar.")
+                Text("O Ilusio mistura este microfone com o som do efeito. Na chamada, escolha “Ilusio Mic”. Com a opção acima, o Ilusio Mic vira o microfone do sistema enquanto o Ilusio estiver ligado, e o seu volta ao desligar.")
             }
 
             Section {
