@@ -15,6 +15,16 @@ enum VirtualCamera {
             .devices.contains { $0.localizedName == deviceName }
     }
 
+    /// A câmera carregada é a desta versão do app: a extensão publica o build no modelo do dispositivo.
+    static var isReady: Bool {
+        AVCaptureDevice.DiscoverySession(deviceTypes: [.external], mediaType: .video, position: .unspecified)
+            .devices.contains { $0.localizedName == deviceName && isCurrent(model: $0.modelID, build: appBuild) }
+    }
+
+    static var appBuild: String { Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "" }
+
+    static func isCurrent(model: String, build: String) -> Bool { model == "\(deviceName) \(build)" }
+
     /// Painel "Itens de Início e Extensões" dos Ajustes do Sistema, onde fica a aprovação de Extensões de Câmera.
     static let approvalSettingsURL = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension")!
 

@@ -86,7 +86,11 @@ final class CameraDeviceSource: NSObject, CMIOExtensionDeviceSource {
     func deviceProperties(forProperties properties: Set<CMIOExtensionProperty>) throws -> CMIOExtensionDeviceProperties {
         let props = CMIOExtensionDeviceProperties(dictionary: [:])
         if properties.contains(.deviceTransportType) { props.transportType = kIOAudioDeviceTransportTypeVirtual }
-        if properties.contains(.deviceModel) { props.model = "Ilusio Camera" }
+        // com o build: o app só dá a câmera por pronta quando a carregada é a desta versão (depois de atualizar,
+        // a antiga segue listada até a nova ser aprovada ou o Mac reiniciar)
+        if properties.contains(.deviceModel) {
+            props.model = "Ilusio Camera \(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "")"
+        }
         return props
     }
 
