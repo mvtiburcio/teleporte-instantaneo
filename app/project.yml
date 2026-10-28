@@ -28,6 +28,8 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)  # sem isto o XcodeGen grava "1.0" fixo
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.entertainment
+        CFBundleDevelopmentRegion: pt-BR
+        CFBundleLocalizations: [pt-BR]  # sem isto o Sparkle (e outros diálogos do sistema) aparece em inglês
         NSCameraUsageDescription: O Ilusio usa a câmera para reconhecer o gesto e aplicar o efeito.
         NSMicrophoneUsageDescription: O Ilusio mistura o seu microfone com o som do teletransporte para a chamada ouvir.
         IlusioRepoDir: $(ILUSIO_REPO_DIR)
