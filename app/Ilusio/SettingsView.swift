@@ -26,6 +26,8 @@ enum AppTheme: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     @AppStorage("theme") private var theme: AppTheme = .system
     @AppStorage(OnboardingView.doneKey) private var onboarded = false
+    @Environment(AppModel.self) private var model
+    @State private var reportMessage: String?
 
     var body: some View {
         Form {
@@ -41,6 +43,9 @@ struct SettingsView: View {
                 }
             }
             Section {
+                LabeledContent("Relatório pro suporte") {
+                    Button("Gerar relatório", systemImage: "doc.text") { reportMessage = Report.save(model: model) }
+                }
                 LabeledContent("Registro do motor") {
                     Button("Mostrar no Finder", systemImage: "folder") { showLog() }
                 }
@@ -48,7 +53,7 @@ struct SettingsView: View {
             } header: {
                 Text("Suporte")
             } footer: {
-                Text("Se algo der errado, o registro do motor mostra o motivo.")
+                Text(reportMessage ?? "Se algo der errado, gere o relatório e mande pra gente: ele leva o motivo, sem precisar do Terminal.")
             }
         }
         .formStyle(.grouped)
