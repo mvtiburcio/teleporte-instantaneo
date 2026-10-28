@@ -23,6 +23,8 @@ PROFILE=ilusio-notary
 PY="${PYTHON:-.venv-release/bin/python}"  # Python do uv (README): o do Homebrew não abre em macOS mais antigo
 OUT="$PWD/build/release"
 DMG="$OUT/Ilusio-$VERSION.dmg"
+BUILD=$(git rev-list --count HEAD)
+REPO_URL=https://github.com/mvtiburcio/teleporte-instantaneo
 
 security find-identity -v -p codesigning | grep -q "$IDENTITY" || { echo "falta o certificado: $IDENTITY" >&2; exit 1; }
 [ -z "$(git status --porcelain)" ] || { echo "há mudanças não commitadas: o release sai só de código versionado" >&2; exit 1; }
@@ -52,8 +54,8 @@ echo "==> 3/6 app (archive + export Developer ID)"
 (cd app && xcodegen generate -q)
 xcodebuild -quiet archive -project app/Ilusio.xcodeproj -scheme Ilusio -configuration Release \
   -destination 'generic/platform=macOS' -archivePath "$OUT/Ilusio.xcarchive" \
-  -allowProvisioningUpdates MARKETING_VERSION="$VERSION" \
-  CURRENT_PROJECT_VERSION="$(git rev-list --count HEAD)"  # build crescente: sem ele o macOS não troca a câmera na atualização
+  -allowProvisioningUpdates -clonedSourcePackagesDirPath "$PWD/build/spm" MARKETING_VERSION="$VERSION" \
+  CURRENT_PROJECT_VERSION="$BUILD"  # build crescente: sem ele o macOS não troca a câmera nem o Sparkle vê a versão nova
 xcodebuild -quiet -exportArchive -archivePath "$OUT/Ilusio.xcarchive" -exportPath "$OUT/export" \
   -exportOptionsPlist scripts/ExportOptions.plist -allowProvisioningUpdates
 APP="$OUT/export/Ilusio.app"
@@ -80,12 +82,35 @@ if [ $NOTARIZE = 1 ]; then
 fi
 (cd "$OUT" && shasum -a 256 "${DMG:t}" | tee "${DMG:t}.sha256")  # só o nome: o caminho local não vai pro arquivo público
 
+# feed do Sparkle: o app lê releases/latest/download/appcast.xml, então só vale depois que a release é publicada.
+# A assinatura EdDSA usa a chave privada do Keychain (generate_keys do Sparkle; sem ela não há atualização).
+SIG=$(build/spm/artifacts/sparkle/Sparkle/bin/sign_update "$DMG")
+cat > "$OUT/appcast.xml" <<XML
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Ilusio</title>
+    <item>
+      <title>Ilusio $VERSION</title>
+      <pubDate>$(LC_ALL=C date -R)</pubDate>
+      <sparkle:version>$BUILD</sparkle:version>
+      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+      <sparkle:releaseNotesLink>$REPO_URL/releases/tag/v$VERSION</sparkle:releaseNotesLink>
+      <enclosure url="$REPO_URL/releases/download/v$VERSION/${DMG:t}" $SIG type="application/octet-stream"/>
+    </item>
+  </channel>
+</rss>
+XML
+
 if [ $PUBLISH = 1 ]; then
   echo "==> 6/6 release no GitHub (rascunho)"
   # a tag nasce no commit compilado, não na ponta da main de quando o rascunho for publicado
   [ -n "$(git branch -r --contains HEAD)" ] || { echo "faça push deste commit antes de publicar" >&2; exit 1; }
-  gh release create "v$VERSION" "$DMG" "$DMG.sha256" --draft --target "$(git rev-parse HEAD)" --title "Ilusio $VERSION" \
-    --notes "Baixe o Ilusio-$VERSION.dmg, arraste o Ilusio para Aplicativos e abra. O app guia o resto (câmera e microfone do Ilusio, fundo, gesto). macOS 26+, Apple Silicon.
+  gh release create "v$VERSION" "$DMG" "$DMG.sha256" "$OUT/appcast.xml" --draft --target "$(git rev-parse HEAD)" --title "Ilusio $VERSION" \
+    --notes "Já tem o Ilusio 0.1.3 ou mais novo? Ele se atualiza sozinho (ou em Ilusio ▸ Buscar atualizações…).
+
+Primeira instalação: baixe o Ilusio-$VERSION.dmg, arraste o Ilusio para Aplicativos e abra. O app guia o resto (câmera e microfone do Ilusio, fundo, gesto). macOS 26+, Apple Silicon.
 
 Windows 10/11 x64: baixe o Ilusio-Setup-$VERSION.exe. Sem assinatura, o Windows avisa no primeiro uso: Mais informações → Executar assim mesmo."
   # o instalador do Windows sai do CI (a partir da main) e entra neste mesmo rascunho: publique só depois que ele aparecer
