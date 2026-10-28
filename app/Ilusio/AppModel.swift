@@ -68,6 +68,7 @@ final class AppModel {
     @ObservationIgnored private var activity: NSObjectProtocol?
     @ObservationIgnored private var activation: CameraActivation?
     var cameraMessage: String?  // retorno da ativação da câmera do Ilusio
+    var cameraActivated = false  // o macOS aceitou a câmera desta versão (até a silenciosa da abertura)
     var micMessage: String?  // retorno da instalação do microfone do Ilusio
     var installingMic = false
     @ObservationIgnored private var lastOut: UInt64 = 0
@@ -224,6 +225,7 @@ final class AppModel {
         }
         let activation = CameraActivation(opensSettings: !quiet) { [weak self] text in
             if !(quiet && text == CameraActivation.doneText) { self?.cameraMessage = text }
+            if text == CameraActivation.doneText { self?.cameraActivated = true }
             if text != CameraActivation.approvalText { self?.activation = nil }  // terminou (sucesso, erro ou reinício)
             self?.refreshChecks()
         }
@@ -279,6 +281,12 @@ final class AppModel {
             let capture = CameraCapture(buffer: frames)
             try capture.start(deviceID: id, fps: Double(fps))
             started = capture
+            // com a câmera própria, o app entrega o vídeo; o OBS só vale rodando do código (o app instalado
+            // caía nele quando a câmera ainda não estava pronta e mostrava o erro do OBS)
+            feed = CameraFeed(frames: frames)
+            if feed == nil && VirtualCamera.appIsInApplications {
+                throw CameraNotReady()
+            }
             let engine = EngineClient()
             let current = ObjectIdentifier(engine)
             engine.onEvent = { [weak self] in self?.handle($0) }
@@ -288,8 +296,6 @@ final class AppModel {
                 lastError = "O motor parou (código \(code)). Detalhes em \(Self.logURL.path)."
             }
             try engine.start(executable: exe, arguments: args, log: Self.logURL)
-            // com a câmera própria instalada, o app entrega o vídeo; senão o motor manda pro OBS
-            feed = CameraFeed(frames: frames)
             var fields: [String: Any] = ["shm": shm, "gain": gain, "reach": reach, "vcam": feed == nil, "fps": fps]
             // o microfone de verdade é decidido antes de o Ilusio Mic virar o padrão do sistema
             if let mic = SystemAudio.engineMic(chosen: micName, systemDefault: SystemAudio.defaultInputName) { fields["mic"] = mic }
@@ -362,5 +368,12 @@ final class AppModel {
         return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
                        space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: info, provider: provider,
                        decode: nil, shouldInterpolate: true, intent: .defaultIntent)
+    }
+}
+
+/// A "Ilusio Camera" não abriu (aprovação pendente ou a câmera nova ainda carregando depois de atualizar).
+struct CameraNotReady: LocalizedError {
+    var errorDescription: String? {
+        "A câmera do Ilusio ainda não está pronta. Veja o item Câmera virtual em Configuração (se acabou de atualizar, reinicie o Mac)."
     }
 }

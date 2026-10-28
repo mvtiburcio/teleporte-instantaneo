@@ -95,7 +95,12 @@ private struct SetupRow: View {
         switch item {
         case .camera: "Para ver você e reconhecer o gesto."
         case .mic: "Para misturar a sua voz com o som do efeito."
-        case .virtualCamera: model.cameraMessage ?? "A “Ilusio Camera” entrega o vídeo com o efeito pra chamada."
+        case .virtualCamera:
+            // ativada mas sem a câmera desta versão na lista: o macOS segura a antiga (ou se perde trocando,
+            // "error 37" no launchd) e só o reinício resolve
+            model.cameraActivated
+                ? "A câmera nova foi ativada, mas o Mac ainda não carregou: reinicie o Mac."
+                : model.cameraMessage ?? "A “Ilusio Camera” entrega o vídeo com o efeito pra chamada."
         case .virtualAudio: model.micMessage ?? "O “Ilusio Mic” entrega a sua voz + o som do efeito pra chamada."
         case .background: "A imagem que aparece quando você some."
         case .gesture: "Dois dedos na testa até ouvir o som."

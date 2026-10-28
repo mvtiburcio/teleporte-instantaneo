@@ -20,9 +20,13 @@ final class SetupTests: XCTestCase {
     }
 
     func testOBSeBlackHoleNaoContamComoProntos() {
-        XCTAssertFalse(SetupChecks.hasOwn(["Câmera FaceTime HD", "OBS Virtual Camera"], SetupChecks.virtualCameraNames))
-        XCTAssertTrue(SetupChecks.hasOwn(["OBS Virtual Camera", "Ilusio Camera"], SetupChecks.virtualCameraNames))
         XCTAssertFalse(SetupChecks.hasOwn(["BlackHole 2ch", "Microfone (MacBook Air)"], SetupChecks.virtualAudioNames))
         XCTAssertTrue(SetupChecks.hasOwn(["Ilusio Mic"], SetupChecks.virtualAudioNames))
+    }
+
+    func testCameraSoContaQuandoEDestaVersao() {
+        XCTAssertTrue(VirtualCamera.isCurrent(model: "Ilusio Camera 115", build: "115"))
+        XCTAssertFalse(VirtualCamera.isCurrent(model: "Ilusio Camera 112", build: "115"))  // a antiga, depois de atualizar
+        XCTAssertFalse(VirtualCamera.isCurrent(model: "Ilusio Camera", build: "115"))  // extensão de antes desta checagem
     }
 }
