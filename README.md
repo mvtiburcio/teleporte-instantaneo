@@ -339,9 +339,13 @@ Opcional: crie `app/Local.xcconfig` (fora do git) com `CODE_SIGN_IDENTITY` e `DE
 Para gerar o app completo (Release), que leva o motor congelado e não precisa de Python:
 
 ```bash
-.venv/bin/pip install -r requirements-dev.txt   # PyInstaller
-tools/congelar_motor.sh                          # build/engine/dist/ilusio-engine (~250 MB)
-ILUSIO_ENGINE=$PWD/build/engine/dist/ilusio-engine/ilusio-engine .venv/bin/python -m unittest tests.test_engine_smoke
+# o motor congelado usa o Python standalone do uv: o do Homebrew sai compilado pra versão do seu Mac
+# e não abre em macOS mais antigo (o congelar_motor.sh recusa)
+brew install uv && uv python install 3.12
+uv venv --python "$(uv python find 3.12 --managed-python)" .venv-release
+uv pip install --python .venv-release/bin/python -r requirements.txt -r requirements-dev.txt
+PYTHON=.venv-release/bin/python tools/congelar_motor.sh   # build/engine/dist/ilusio-engine (~250 MB)
+ILUSIO_ENGINE=$PWD/build/engine/dist/ilusio-engine/ilusio-engine .venv-release/bin/python -m unittest tests.test_engine_smoke
 cd app && xcodebuild -project Ilusio.xcodeproj -scheme Ilusio -configuration Release build
 ```
 
