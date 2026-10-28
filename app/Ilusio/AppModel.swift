@@ -68,6 +68,7 @@ final class AppModel {
     @ObservationIgnored private var activity: NSObjectProtocol?
     @ObservationIgnored private var activation: CameraActivation?
     var cameraMessage: String?  // retorno da ativação da câmera do Ilusio
+    var cameraActivated = false  // o macOS aceitou a câmera desta versão (até a silenciosa da abertura)
     var micMessage: String?  // retorno da instalação do microfone do Ilusio
     var installingMic = false
     @ObservationIgnored private var lastOut: UInt64 = 0
@@ -224,6 +225,7 @@ final class AppModel {
         }
         let activation = CameraActivation(opensSettings: !quiet) { [weak self] text in
             if !(quiet && text == CameraActivation.doneText) { self?.cameraMessage = text }
+            if text == CameraActivation.doneText { self?.cameraActivated = true }
             if text != CameraActivation.approvalText { self?.activation = nil }  // terminou (sucesso, erro ou reinício)
             self?.refreshChecks()
         }
