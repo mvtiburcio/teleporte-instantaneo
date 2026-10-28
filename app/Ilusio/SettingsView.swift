@@ -49,6 +49,9 @@ struct SettingsView: View {
                 LabeledContent("Registro do motor") {
                     Button("Mostrar no Finder", systemImage: "folder") { showLog() }
                 }
+                LabeledContent("Atualizações") {
+                    Button("Buscar atualizações", systemImage: "arrow.down.circle") { IlusioApp.updater.checkForUpdates(nil) }
+                }
                 LabeledContent("Versão", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—")
             } header: {
                 Text("Suporte")

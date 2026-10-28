@@ -1,9 +1,12 @@
+import Sparkle
 import SwiftUI
 
 @main
 struct IlusioApp: App {
     @State private var model = AppModel()
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
+    /// Procura atualização sozinho (1x por dia) e pelo menu; baixa, troca o app no lugar e reabre.
+    static let updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 
     init() {
         signal(SIGPIPE, SIG_IGN)  // escrever pra um motor que morreu não pode derrubar o app
@@ -16,6 +19,11 @@ struct IlusioApp: App {
                 .onAppear { delegate.model = model }
         }
         .defaultSize(width: 1040, height: 720)
+        .commands {
+            CommandGroup(after: .appInfo) {
+                Button("Buscar atualizações…") { Self.updater.checkForUpdates(nil) }
+            }
+        }
     }
 }
 

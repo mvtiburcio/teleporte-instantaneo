@@ -3,6 +3,10 @@ options:
   bundleIdPrefix: com.mvtiburcio
   deploymentTarget:
     macOS: "26.0"
+packages:
+  Sparkle:  # atualização automática (verifica, baixa, troca o app no lugar e reabre)
+    url: https://github.com/sparkle-project/Sparkle
+    from: 2.6.0
 configFiles:
   Debug: Base.xcconfig
   Release: Base.xcconfig
@@ -30,6 +34,11 @@ targets:
         PixKey: $(PIX_KEY)
         PixName: $(PIX_NAME)
         PixCity: $(PIX_CITY)
+        # Sparkle: o feed sai como asset de cada release (release.sh); a chave pública confere a assinatura
+        # EdDSA do .dmg (a privada fica no Keychain de quem gera o release)
+        SUFeedURL: https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest/download/appcast.xml
+        SUPublicEDKey: lZ5z8s/G0BHd0ag5Ixy/zNQTUeAi5dFWvog+ANMPE2s=
+        SUEnableAutomaticChecks: true
         NSSystemExtensionUsageDescription: A câmera do Ilusio entrega o vídeo com o efeito para a chamada.
     entitlements:
       path: Ilusio/Ilusio.entitlements
@@ -42,6 +51,7 @@ targets:
     dependencies:
       - target: IlusioCamera
         embed: true
+      - package: Sparkle
     postCompileScripts:
       - name: Embutir o Ilusio Mic
         # driver de áudio próprio (BlackHole GPL-3 renomeado); compilado uma vez por IlusioMic/build.sh
