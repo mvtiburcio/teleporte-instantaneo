@@ -3,7 +3,7 @@
 # e cria a release no GitHub como RASCUNHO (quem publica é uma pessoa, depois de conferir).
 # Uso: scripts/release.sh 0.1.0 [--sem-notarizar] [--sem-publicar]
 # Pré-requisitos: certificado "Developer ID Application" da TKI no Keychain, perfil do notarytool
-# "ilusio-notary" (xcrun notarytool store-credentials), .venv com requirements-dev.txt e gh logado.
+# "ilusio-notary" (xcrun notarytool store-credentials), .venv-release (Python do uv, ver README) com requirements-dev.txt e gh logado.
 set -euo pipefail
 cd "${0:A:h}/.."
 
@@ -20,7 +20,7 @@ done
 TEAM=73928LZ8Q7
 IDENTITY="Developer ID Application: TKI TECNOLOGIA LTDA ($TEAM)"
 PROFILE=ilusio-notary
-PY="${PYTHON:-.venv/bin/python}"
+PY="${PYTHON:-.venv-release/bin/python}"  # Python do uv (README): o do Homebrew não abre em macOS mais antigo
 OUT="$PWD/build/release"
 DMG="$OUT/Ilusio-$VERSION.dmg"
 
