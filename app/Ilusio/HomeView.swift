@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @Environment(AppModel.self) private var model
+    @State private var reportMessage: String?
 
     var body: some View {
         VStack(spacing: 18) {
@@ -26,6 +27,10 @@ struct HomeView: View {
                 Label(err, systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.red)
                     .textSelection(.enabled)
+                Button(reportMessage ?? "Gerar relatório pro suporte", systemImage: "doc.text") {
+                    reportMessage = Report.save(model: model)
+                }
+                .buttonStyle(.glass)
             }
         }
         .padding(24)
