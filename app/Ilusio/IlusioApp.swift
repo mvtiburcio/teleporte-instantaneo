@@ -10,6 +10,7 @@ struct IlusioApp: App {
 
     init() {
         signal(SIGPIPE, SIG_IGN)  // escrever pra um motor que morreu não pode derrubar o app
+        _ = Self.updater  // static é preguiçoso: sem isto a verificação diária só começaria no primeiro clique
     }
 
     var body: some Scene {
