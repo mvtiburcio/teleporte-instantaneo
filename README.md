@@ -10,13 +10,14 @@
 <p align="center">
   <a href="https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest"><img src="https://img.shields.io/github/v/release/mvtiburcio/teleporte-instantaneo?label=vers%C3%A3o&color=FF8A1F" alt="Última versão"></a>
   <img src="https://img.shields.io/badge/app-macOS%2026%2B-000000?logo=apple&logoColor=white" alt="App: macOS 26+">
+  <img src="https://img.shields.io/badge/app-Windows%2010%2F11-0078D4?logo=windows11&logoColor=white" alt="App: Windows 10 e 11">
   <img src="https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white" alt="Python 3.12">
   <img src="https://img.shields.io/badge/MediaPipe-0.10.14-0097A7" alt="MediaPipe 0.10.14">
   <img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green" alt="Licença MIT">
   <a href="#apoie-o-projeto"><img src="https://img.shields.io/badge/apoie-Pix-32BCAD" alt="Apoie com Pix"></a>
 </p>
 
-O **Ilusio** coloca efeitos na sua webcam que funcionam no **Google Meet, Zoom, Teams e WhatsApp do Mac**: você faz um gesto e a mágica acontece na chamada, de verdade, para todo mundo ver.
+O **Ilusio** coloca efeitos na sua webcam que funcionam no **Google Meet, Zoom, Teams e WhatsApp no Mac e no Windows**: você faz um gesto e a mágica acontece na chamada, de verdade, para todo mundo ver.
 
 O primeiro efeito é o **Teletransporte Instantâneo**, inspirado no Goku: coloque **dois dedos na testa**, ouça o *"vuush"* e **suma da câmera**, com os riscos verticais clássicos do anime. Faça o gesto de novo e você **reaparece**, de onde estiver.
 
@@ -26,8 +27,9 @@ O primeiro efeito é o **Teletransporte Instantâneo**, inspirado no Goku: coloq
 
 <p align="center">
   <a href="https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest"><img src="https://img.shields.io/badge/Baixar_o_Ilusio-macOS_26%2B_%C2%B7_Apple_Silicon-FF8A1F?style=for-the-badge&logo=apple&logoColor=white" alt="Baixar o Ilusio para Mac" height="44"></a>
+  <a href="https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest"><img src="https://img.shields.io/badge/Baixar_o_Ilusio-Windows_10%2F11-0078D4?style=for-the-badge&logo=windows11&logoColor=white" alt="Baixar o Ilusio para Windows" height="44"></a>
 </p>
-<p align="center">Grátis · assinado e notarizado pela Apple · sem instalar mais nada<br>
+<p align="center">Grátis · instaladores para macOS e Windows<br>
 Prefere o terminal? Veja <a href="#usar-pela-linha-de-comando">Usar pela linha de comando</a>.</p>
 
 ---
@@ -35,7 +37,8 @@ Prefere o terminal? Veja <a href="#usar-pela-linha-de-comando">Usar pela linha d
 ## Sumário
 
 - [Como você quer usar?](#como-você-quer-usar)
-- [Baixar e instalar o app](#baixar-e-instalar-o-app)
+- [Baixar e instalar no Windows](#baixar-e-instalar-no-windows)
+- [Baixar e instalar no Mac](#baixar-e-instalar-no-mac)
 - [Usando o app](#usando-o-app)
 - [Efeito: Teletransporte Instantâneo](#efeito-teletransporte-instantâneo)
 - [Como funciona](#como-funciona)
@@ -51,18 +54,36 @@ Prefere o terminal? Veja <a href="#usar-pela-linha-de-comando">Usar pela linha d
 
 ## Como você quer usar?
 
-| | **App para Mac** (recomendado) | **Linha de comando** |
-|---|---|---|
-| Para quem | Qualquer pessoa | Quem programa, quer mexer no código ou tem macOS mais antigo |
-| Como instala | [Baixa o `.dmg`](https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest) e arrasta para Aplicativos | `git clone` + `./setup.sh` |
-| Sistema | macOS 26+, Apple Silicon | macOS 13+ (Apple Silicon ou Intel) |
-| Precisa instalar mais algo? | Não: câmera e microfone virtuais vêm dentro do app | Sim: Homebrew, Python 3.12, OBS e BlackHole (o `setup.sh` instala) |
-| Câmera na chamada | **Ilusio Camera** | OBS Virtual Camera |
-| Microfone na chamada | **Ilusio Mic** | BlackHole 2ch |
-| Configuração | Tour + checklist guiado, tudo na tela | Configuração única do OBS |
-| Atalhos | Globais (funcionam com a chamada em primeiro plano) | Teclas na janela de prévia |
+| | **App para Windows** | **App para Mac** | **Linha de comando (Mac)** |
+|---|---|---|---|
+| Para quem | Qualquer pessoa no Windows | Qualquer pessoa no Mac | Quem programa ou tem macOS mais antigo |
+| Como instala | [Baixa o `Ilusio-Setup-<versão>.exe`](https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest) | [Baixa o `.dmg`](https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest) e arrasta para Aplicativos | `git clone` + `./setup.sh` |
+| Sistema | Windows 10/11 x64 | macOS 26+, Apple Silicon | macOS 13+ (Apple Silicon ou Intel) |
+| Precisa instalar mais algo? | OBS Virtual Camera e VB-Cable; o checklist guia | Não: câmera e microfone virtuais vêm dentro do app | Homebrew, Python 3.12, OBS e BlackHole (o `setup.sh` instala) |
+| Câmera na chamada | OBS Virtual Camera | **Ilusio Camera** | OBS Virtual Camera |
+| Microfone na chamada | CABLE Output (VB-Cable) | **Ilusio Mic** | BlackHole 2ch |
+| Configuração | Tour + checklist guiado | Tour + checklist guiado | Configuração única do OBS |
+| Atalhos | Globais | Globais | Teclas na janela de prévia |
 
-## Baixar e instalar o app
+## Baixar e instalar no Windows
+
+**Requisitos:** Windows 10 ou 11 de 64 bits, webcam e microfone.
+
+1. Na [última versão](https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest), baixe **`Ilusio-Setup-<versão>.exe`**.
+2. Execute o instalador. Como ele ainda não tem assinatura de código, o SmartScreen pode mostrar **O Windows protegeu o computador**; confirme a origem do arquivo e use **Mais informações → Executar assim mesmo**.
+3. Abra o **Ilusio** e siga o tour e o checklist da aba **Configuração**. Ele orienta a liberar câmera e microfone, instalar gratuitamente a **OBS Virtual Camera** e o **VB-Cable**, gravar o fundo e configurar o app de chamada.
+4. No Meet, Zoom, Teams ou WhatsApp, escolha **OBS Virtual Camera** como câmera e **CABLE Output** como microfone. Desligue a supressão de ruído para o som do efeito não ser cortado.
+
+O instalador não inclui OBS nem VB-Cable: ambos criam dispositivos virtuais no Windows e precisam ser instalados separadamente. O próprio checklist detecta quando cada um está pronto. Para conferir o download no PowerShell:
+
+```powershell
+Get-FileHash .\Ilusio-Setup-<versão>.exe -Algorithm SHA256
+Get-Content .\Ilusio-Setup-<versão>.exe.sha256
+```
+
+**Atualizar:** baixe e execute o instalador da versão nova; ele substitui a instalação anterior. **Desinstalar:** Configurações → Aplicativos → Aplicativos instalados → Ilusio → Desinstalar. OBS e VB-Cable são independentes e permanecem instalados.
+
+## Baixar e instalar no Mac
 
 **Requisitos:** Mac com Apple Silicon (M1 ou mais novo), macOS 26 ou mais novo e uma webcam (a do próprio Mac serve).
 
@@ -86,7 +107,7 @@ sudo rm -rf /Library/Audio/Plug-Ins/HAL/IlusioMic.driver && sudo killall coreaud
 
 ## Usando o app
 
-Interface em SwiftUI com o visual Liquid Glass do macOS 26.
+No Mac, a interface usa SwiftUI com o visual Liquid Glass. No Windows, usa Qt 6 com tema no estilo Fluent. As duas oferecem o mesmo fluxo principal.
 
 **Abas.**
 
@@ -101,12 +122,12 @@ Interface em SwiftUI com o visual Liquid Glass do macOS 26.
 
 **Atalhos globais** (padrões, configuráveis na aba Atalhos):
 
-| Atalho | Ação |
-|---|---|
-| `⌃⌥T` | Sumir / voltar |
-| `⌃⌥L` | Ligar / desligar o Ilusio |
-| `⌃⌥B` | Gravar o fundo |
-| `⌃⌥R` | Reaparecer na hora (sem efeito) |
+| Mac | Windows | Ação |
+|---|---|---|
+| `⌃⌥T` | `Ctrl+Alt+Shift+T` | Sumir / voltar |
+| `⌃⌥L` | `Ctrl+Alt+Shift+L` | Ligar / desligar o Ilusio |
+| `⌃⌥B` | `Ctrl+Alt+Shift+B` | Gravar o fundo |
+| `⌃⌥R` | `Ctrl+Alt+Shift+R` | Reaparecer na hora (sem efeito) |
 
 ## Efeito: Teletransporte Instantâneo
 
@@ -142,10 +163,10 @@ O efeito dura **0,9 s** e acompanha o som:
   <img src="docs/img/arquitetura.svg" alt="Diagrama: webcam e microfone entram no motor; o vídeo sai por uma câmera virtual e o áudio por um microfone virtual, ambos indo para a chamada" width="900">
 </p>
 
-1. **Vídeo.** O motor (`teleporte.py`) procura o gesto com o **MediaPipe** (mão + rosto). Quando ele dispara, o motor recorta a sua silhueta e aplica o efeito. O resultado sai por uma **câmera virtual**, que a chamada enxerga como uma câmera normal: no app, a **Ilusio Camera** (uma extensão de câmera do macOS, aprovada uma vez no checklist); na linha de comando, a OBS Virtual Camera.
-2. **Áudio.** As chamadas **cortam** o que sai do alto-falante (cancelamento de eco), então tocar o som no Mac não basta. O motor vira o seu microfone: mistura o microfone de verdade com o som do efeito e manda tudo para um **microfone virtual**: no app, o **Ilusio Mic**, que vai dentro do app; na linha de comando, o BlackHole 2ch.
+1. **Vídeo.** O motor (`teleporte.py`) procura o gesto com o **MediaPipe** (mão + rosto). Quando ele dispara, o motor recorta a sua silhueta e aplica o efeito. O resultado sai por uma **câmera virtual**, que a chamada enxerga como uma câmera normal: **Ilusio Camera** no app do Mac e **OBS Virtual Camera** no Windows e na linha de comando.
+2. **Áudio.** As chamadas **cortam** o que sai do alto-falante (cancelamento de eco), então tocar o som no computador não basta. O motor mistura o microfone de verdade com o som do efeito e manda tudo para um **microfone virtual**: **Ilusio Mic** no app do Mac, **CABLE Output** no Windows e BlackHole 2ch na linha de comando do Mac.
 3. **Sumir.** Enquanto você está "teleportado", a chamada recebe a **foto do fundo** gravada antes, sem sombra nem contorno.
-4. **No app.** O app captura a câmera escolhida e troca os frames com o motor por **memória compartilhada** (`ipc.py`). Os comandos e eventos vão em JSON por linha. A prévia, os atalhos e o checklist ficam no app; o efeito, no motor.
+4. **No app.** No Mac, o app troca frames com o motor por **memória compartilhada** (`ipc.py`) e envia comandos e eventos em JSON. No Windows, a interface e o motor rodam no mesmo processo, com o processamento em uma thread dedicada. Nos dois casos, a prévia, os atalhos e o checklist ficam no app; o efeito continua no mesmo motor Python.
 
 ## Usar pela linha de comando
 
@@ -299,6 +320,7 @@ O mesmo Pix está na aba **Apoiar** do app. Também ajuda muito dar uma ⭐ no r
 
 - [x] Efeito Teletransporte Instantâneo
 - [x] App para Mac: Início, Câmera e mic, Configuração guiada, Atalhos globais, Apoiar, Ajustes e tour de primeiro acesso
+- [x] App para Windows 10/11 com a mesma interface, instalador, atalhos globais, OBS Virtual Camera e VB-Cable
 - [x] Câmera virtual própria (**Ilusio Camera**), sem precisar do OBS
 - [x] Microfone virtual próprio (**Ilusio Mic**), sem precisar instalar o BlackHole
 - [x] `.dmg` assinado com Developer ID e notarizado, publicado nas [Releases](https://github.com/mvtiburcio/teleporte-instantaneo/releases/latest)
@@ -311,9 +333,12 @@ teleporte-instantaneo/
 ├── teleporte.py           # motor: gesto, efeito, câmera virtual e mixer de áudio (--ipc = modo app)
 ├── ipc.py                 # ponte com o app: frames em memória compartilhada + comandos JSON
 ├── app/                   # app Ilusio em SwiftUI (gere o projeto com xcodegen)
+├── windows/               # app para Windows em PySide6 + testes + instalador Inno Setup
 ├── tests/                 # testes do motor
 ├── teleporte              # lançador da linha de comando (esconde os logs internos do MediaPipe/CoreAudio)
 ├── setup.sh               # instala tudo
+├── setup-windows.ps1      # prepara o ambiente de desenvolvimento no Windows
+├── ilusio-windows.ps1     # inicia o app Windows a partir do código
 ├── requirements.txt       # dependências Python fixadas
 ├── sons/goku-teleport.mp3 # som original (o teleport.wav é gerado a partir dele)
 ├── tools/                 # preparar_som.py, gerar_demo.py e congelar_motor.sh (motor dentro do app)
@@ -326,6 +351,20 @@ Testes:
 .venv/bin/python -m unittest discover -s tests          # motor
 cd app && xcodebuild test -project Ilusio.xcodeproj -scheme Ilusio -destination 'platform=macOS,arch=arm64'
 ```
+
+No Windows, abra o PowerShell na raiz do projeto. O setup exige Python 3.12 e FFmpeg e mostra os comandos de instalação caso algum deles esteja ausente:
+
+```powershell
+.\setup-windows.ps1
+.\ilusio-windows.ps1
+
+# testes
+$env:QT_QPA_PLATFORM = "offscreen"
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe -m unittest discover -s windows\tests -v
+```
+
+Para gerar o instalador localmente, use o mesmo fluxo do job `instalador` em `.github/workflows/windows.yml` (PyInstaller `--onedir` e Inno Setup 6).
 
 Para rodar o **app a partir do código** (macOS 26+, Xcode e `brew install xcodegen`), usando o motor em Python do `.venv`:
 
